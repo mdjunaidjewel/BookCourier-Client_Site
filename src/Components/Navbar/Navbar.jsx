@@ -1,15 +1,48 @@
-import React from "react";
-import { Link } from "react-router";
+import React, { useContext } from "react";
+import { Link, useNavigate } from "react-router";
 import Logo from "../../assets/book-logo.png";
+import { AuthContext } from "../Providers/AuthContext/AuthProvider";
+import Swal from "sweetalert2"; // SweetAlert import
 
 const Navbar = () => {
+  const { user, logOut, loading } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+
+      // SweetAlert centered success
+      Swal.fire({
+        icon: "success",
+        title: "Logged out successfully!",
+        text: "You have been logged out.",
+        confirmButtonText: "OK",
+        position: "center", // centered modal
+        timer: 2500,
+        showConfirmButton: true,
+      });
+
+      navigate("/", { replace: true });
+    } catch (err) {
+      // SweetAlert centered error
+      Swal.fire({
+        icon: "error",
+        title: "Logout failed!",
+        text: err.message,
+        confirmButtonText: "OK",
+        position: "center",
+      });
+    }
+  };
+
   return (
-    <div className="navbar bg-base-100 shadow-sm">
-      {/* Navbar Start (Logo + Mobile Toggle) */}
+    <div className="navbar bg-base-100 shadow-sm px-4">
+      {/* Navbar Start */}
       <div className="navbar-start">
         {/* Mobile Dropdown */}
         <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+          <div tabIndex={0} className="btn btn-ghost lg:hidden">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
@@ -40,24 +73,47 @@ const Navbar = () => {
             <li>
               <Link to="/dashboard">Dashboard</Link>
             </li>
-            <li>
-              <Link to="/login" className="btn btn-sm btn-primary mt-2">
-                Login
-              </Link>
-            </li>
+
+            {loading ? (
+              <li>Loading...</li>
+            ) : !user ? (
+              <li>
+                <Link to="/login" className="btn btn-sm btn-primary mt-2">
+                  Login
+                </Link>
+              </li>
+            ) : (
+              <li className="flex flex-col items-center">
+                <img
+                  src={user.photoURL || "/default-profile.png"}
+                  alt="Profile"
+                  className="w-14 h-14 rounded-full mb-2 cursor-pointer"
+                  onClick={() => navigate("/profile")}
+                />
+                <span className="font-medium mb-1">
+                  {user.displayName || "User"}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-sm btn-error w-full"
+                >
+                  Logout
+                </button>
+              </li>
+            )}
           </ul>
         </div>
 
         {/* Logo */}
         <img className="w-14" src={Logo} alt="logo" />
-        <Link to="/" className="btn btn-ghost text-xl">
+        <Link to="/" className="btn btn-ghost text-xl ml-2">
           BookCourier
         </Link>
       </div>
 
-      {/* Navbar End (Right Side Menu) */}
-      <div className="navbar-end hidden lg:flex">
-        <ul className="menu menu-horizontal px-1 items-center">
+      {/* Navbar End */}
+      <div className="navbar-end hidden lg:flex items-center">
+        <ul className="menu menu-horizontal px-1 items-center gap-2">
           <li>
             <Link to="/">Home</Link>
           </li>
@@ -67,11 +123,42 @@ const Navbar = () => {
           <li>
             <Link to="/dashboard">Dashboard</Link>
           </li>
-          <li>
-            <Link to="/login" className="btn btn-primary ml-2">
-              Login
-            </Link>
-          </li>
+
+          {loading ? (
+            <li>Loading...</li>
+          ) : !user ? (
+            <li>
+              <Link to="/login" className="btn btn-primary ml-2">
+                Login
+              </Link>
+            </li>
+          ) : (
+            <li className="dropdown dropdown-end">
+              <div
+                tabIndex={0}
+                className="flex items-center cursor-pointer font-medium"
+              >
+                {user.displayName || "User"}
+              </div>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32 mt-2 flex flex-col items-center"
+              >
+                <img
+                  src={user.photoURL || "/default-profile.png"}
+                  alt="Profile"
+                  className="w-14 h-14 rounded-full mb-2 cursor-pointer"
+                  onClick={() => navigate("/profile")}
+                />
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-error btn-sm w-full"
+                >
+                  Logout
+                </button>
+              </ul>
+            </li>
+          )}
         </ul>
       </div>
     </div>

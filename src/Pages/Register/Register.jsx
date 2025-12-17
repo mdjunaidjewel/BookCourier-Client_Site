@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
