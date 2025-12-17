@@ -6,6 +6,7 @@ import Register from "../../Pages/Register/Register";
 import Profile from "../../Pages/Profile/Profile";
 import NotFound from "../../Pages/NotFound/NotFound";
 import PrivateRoute from "../PrivateRoute/PrivateRout";
+import AllBooks from "../../Pages/AllBooks/AllBooks";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
       {
         path: "/register",
         element: <Register></Register>,
+      },
+      {
+        path: '/books',
+        element:<AllBooks></AllBooks>
       },
       // Protected route
       {

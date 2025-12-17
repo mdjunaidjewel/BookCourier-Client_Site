@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router";
 import Logo from "../../assets/book-logo.png";
 import { AuthContext } from "../Providers/AuthContext/AuthProvider";
-import Swal from "sweetalert2"; // SweetAlert import
+import Swal from "sweetalert2";
 
 const Navbar = () => {
   const { user, logOut, loading } = useContext(AuthContext);
@@ -12,20 +12,18 @@ const Navbar = () => {
     try {
       await logOut();
 
-      // SweetAlert centered success
       Swal.fire({
         icon: "success",
         title: "Logged out successfully!",
         text: "You have been logged out.",
         confirmButtonText: "OK",
-        position: "center", // centered modal
+        position: "center",
         timer: 2500,
         showConfirmButton: true,
       });
 
       navigate("/", { replace: true });
     } catch (err) {
-      // SweetAlert centered error
       Swal.fire({
         icon: "error",
         title: "Logout failed!",
@@ -59,7 +57,6 @@ const Navbar = () => {
             </svg>
           </div>
 
-          {/* Mobile Menu */}
           <ul
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow lg:hidden"
@@ -87,11 +84,14 @@ const Navbar = () => {
                 <img
                   src={user.photoURL || "/default-profile.png"}
                   alt="Profile"
-                  className="w-14 h-14 rounded-full mb-2 cursor-pointer"
+                  className="w-14 h-14 rounded-full mb-1 cursor-pointer"
                   onClick={() => navigate("/profile")}
                 />
-                <span className="font-medium mb-1">
-                  {user.displayName || "User"}
+                <span
+                  className="text-sm font-medium mb-2 cursor-pointer"
+                  onClick={() => navigate("/profile")}
+                >
+                Update Profile
                 </span>
                 <button
                   onClick={handleLogout}
@@ -134,22 +134,25 @@ const Navbar = () => {
             </li>
           ) : (
             <li className="dropdown dropdown-end">
-              <div
+              {/* শুধু প্রোফাইল ছবি দেখাবে */}
+              <img
+                src={user.photoURL || "/default-profile.png"}
+                alt="Profile"
+                className="w-12 h-12 rounded-full cursor-pointer"
                 tabIndex={0}
-                className="flex items-center cursor-pointer font-medium"
-              >
-                {user.displayName || "User"}
-              </div>
+              />
+
+              {/* Dropdown menu */}
               <ul
                 tabIndex={0}
                 className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32 mt-2 flex flex-col items-center"
               >
-                <img
-                  src={user.photoURL || "/default-profile.png"}
-                  alt="Profile"
-                  className="w-14 h-14 rounded-full mb-2 cursor-pointer"
+                <span
+                  className="text-sm font-medium mb-4 cursor-pointer"
                   onClick={() => navigate("/profile")}
-                />
+                >
+                Update Profile
+                </span>
                 <button
                   onClick={handleLogout}
                   className="btn btn-error btn-sm w-full"
