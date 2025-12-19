@@ -7,6 +7,8 @@ import Profile from "../../Pages/Profile/Profile";
 import NotFound from "../../Pages/NotFound/NotFound";
 import PrivateRoute from "../PrivateRoute/PrivateRout";
 import AllBooks from "../../Pages/AllBooks/AllBooks";
+import BookDetails from "../../Pages/AllBooks/BookDetails";
+import Dashboard from "../../Pages/Dashboard/Dashboard";
 
 const router = createBrowserRouter([
   {
@@ -18,32 +20,45 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/login",
-        element: <Login></Login>,
+        path: "login",
+        element: <Login />,
       },
       {
-        path: "/register",
-        element: <Register></Register>,
+        path: "register",
+        element: <Register />,
       },
+
+      // ---------- BOOK ROUTES ----------
       {
-        path: '/books',
-        element:<AllBooks></AllBooks>
+        path: "books",
+        element: <AllBooks />,
       },
-      // Protected route
+
+      // ---------- PRIVATE ROUTES ----------
       {
-        element: <PrivateRoute />, // wrapper
+        element: <PrivateRoute />,
         children: [
           {
             path: "profile",
             element: <Profile />,
           },
+          {
+            path: "books/:id",
+            element: <BookDetails />,
+          },
+          {
+            path: '/dashboard',
+            element:<Dashboard></Dashboard>
+          }
         ],
       },
     ],
   },
+
+  // ---------- NOT FOUND ----------
   {
     path: "*",
-    element: <NotFound></NotFound>,
+    element: <NotFound />,
   },
 ]);
 

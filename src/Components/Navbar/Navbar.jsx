@@ -84,18 +84,12 @@ const Navbar = () => {
                 <img
                   src={user.photoURL || "/default-profile.png"}
                   alt="Profile"
-                  className="w-14 h-14 rounded-full mb-1 cursor-pointer"
+                  className="w-14 h-14 rounded-full mb-2 cursor-pointer"
                   onClick={() => navigate("/profile")}
                 />
-                <span
-                  className="text-sm font-medium mb-2 cursor-pointer"
-                  onClick={() => navigate("/profile")}
-                >
-                Update Profile
-                </span>
                 <button
                   onClick={handleLogout}
-                  className="btn btn-sm btn-error w-full"
+                  className="btn btn-sm btn-error w-full cursor-pointer"
                 >
                   Logout
                 </button>
@@ -147,15 +141,9 @@ const Navbar = () => {
                 tabIndex={0}
                 className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-32 mt-2 flex flex-col items-center"
               >
-                <span
-                  className="text-sm font-medium mb-4 cursor-pointer"
-                  onClick={() => navigate("/profile")}
-                >
-                Update Profile
-                </span>
                 <button
                   onClick={handleLogout}
-                  className="btn btn-error btn-sm w-full"
+                  className="btn btn-error btn-sm w-full cursor-pointer"
                 >
                   Logout
                 </button>
