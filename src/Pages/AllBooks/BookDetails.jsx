@@ -13,11 +13,16 @@ const BookDetails = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({ phone: "", address: "" });
 
+  // Fetch book details
   useEffect(() => {
     fetch(`http://localhost:3000/api/books/${id}`)
       .then((res) => res.json())
       .then((data) => {
         setBook(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
         setLoading(false);
       });
   }, [id]);
@@ -29,6 +34,12 @@ const BookDetails = () => {
   const handlePlaceOrder = () => {
     if (!formData.phone || !formData.address) {
       Swal.fire("Error", "Please fill all fields", "error");
+      return;
+    }
+
+    // Only normal users can place order
+    if (user?.role !== "user") {
+      Swal.fire("Access Denied", "Only normal users can place orders", "error");
       return;
     }
 
@@ -69,19 +80,28 @@ const BookDetails = () => {
         className="w-full rounded shadow-lg"
       />
       <h2 className="text-2xl font-bold mt-4">{book.title}</h2>
-      <p>{book.author}</p>
+      <p className="text-gray-700">{book.author}</p>
       <p className="mt-4">{book.description}</p>
       <p className="mt-2 font-bold text-green-600">Price: ${book.price}</p>
 
-      <button
-        onClick={() => setModalOpen(true)}
-        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        Order Now
-      </button>
+      {/* Added by */}
+      <p className="mt-2 text-gray-600">
+        Added by: {book.addedByName || "Unknown"}
+      </p>
 
+      {/* Order button only for normal users */}
+      {user?.role === "user" && (
+        <button
+          onClick={() => setModalOpen(true)}
+          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Order Now
+        </button>
+      )}
+
+      {/* Modal for placing order */}
       {modalOpen && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
+        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded shadow-lg w-96 relative">
             <button
               onClick={() => setModalOpen(false)}

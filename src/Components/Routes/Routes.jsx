@@ -13,6 +13,9 @@ import Payment from "../Payment/Payment";
 import Invoice from "../../Pages/Invoice/Invoice";
 import Orders from "../../Pages/Dashboard/Librarian/Orders";
 import AddBook from "../../Pages/Dashboard/Librarian/AddBook";
+import MyBooks from "../../Pages/Dashboard/Librarian/MyBooks";
+import ManageBooks from "../../Pages/Dashboard/Admin/ManageBooks";
+import AllUsers from "../../Pages/Dashboard/Admin/AllUsers";
 
 const router = createBrowserRouter([
   {
@@ -67,6 +70,20 @@ const router = createBrowserRouter([
               {
                 path: 'add-book',
                 element:<AddBook></AddBook>
+              },
+              {
+                path: 'my-books',
+                element:<MyBooks></MyBooks>
+              },
+
+              // Admin book manage
+              {
+                path: 'books',
+                element: <ManageBooks></ManageBooks>
+              },
+              {
+                path: 'users',
+                element:<AllUsers></AllUsers>
               }
             ],
           },
