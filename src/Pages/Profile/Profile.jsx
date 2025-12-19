@@ -7,17 +7,15 @@ import Swal from "sweetalert2";
 const Profile = () => {
   const { user, setUser } = useContext(AuthContext);
   const [modalOpen, setModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true); // Page load spinner
+  const [loading, setLoading] = useState(true);
   const [name, setName] = useState(user?.displayName || "");
   const [photoURL, setPhotoURL] = useState(user?.photoURL || "");
 
-  // Spinner delay on mount
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
-  // Update handler
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -25,41 +23,30 @@ const Profile = () => {
         displayName: name,
         photoURL: photoURL,
       });
-
-      // Update context so UI refreshes immediately
       setUser({ ...user, displayName: name, photoURL: photoURL });
-
       Swal.fire({
         icon: "success",
         title: "Profile Updated!",
-        text: "Your profile has been updated successfully 🎉",
         timer: 2000,
         showConfirmButton: false,
       });
-
       setModalOpen(false);
-
-      // Reload page to show full-page spinner
-      setTimeout(() => {
-        setLoading(true); // spinner true before reload
-        window.location.reload();
-      }, 1800);
+      setTimeout(() => window.location.reload(), 1800);
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Update Failed!",
-        text: error.message || "Something went wrong. Try again later.",
+        text: error.message || "Something went wrong.",
       });
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <span className="loading loading-spinner loading-xl text-cyan-600"></span>
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-100 via-white to-blue-100 px-4 py-10">
@@ -68,23 +55,14 @@ const Profile = () => {
           My Profile
         </h2>
 
-        {/* User Image */}
         <div className="flex flex-col items-center mb-6">
           <img
             src={user?.photoURL || "/default-profile.png"}
             alt={user?.displayName || "User"}
             className="w-28 h-28 rounded-full border-4 border-cyan-400 shadow-md object-cover"
           />
-          <h3 className="text-2xl font-semibold mt-2">
-            {user?.displayName || "Unnamed User"}
-          </h3>
+          <h3 className="text-2xl font-semibold mt-2">{user?.displayName}</h3>
           <p className="text-gray-600 mt-1">{user?.email}</p>
-          {user?.metadata?.creationTime && (
-            <p className="text-sm text-gray-500 mt-1">
-              Account Created:{" "}
-              {new Date(user.metadata.creationTime).toLocaleDateString()}
-            </p>
-          )}
         </div>
 
         <div className="flex justify-center">
@@ -96,23 +74,12 @@ const Profile = () => {
           </button>
         </div>
 
-        {/* Modal */}
         {modalOpen && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
               <h3 className="text-xl font-bold mb-4 text-center">
                 Update Profile
               </h3>
-
-              {/* Live Preview */}
-              <div className="flex flex-col items-center mb-4">
-                <img
-                  src={photoURL || "/default-profile.png"}
-                  alt="Preview"
-                  className="w-24 h-24 rounded-full border-2 border-cyan-400 mb-2 object-cover"
-                />
-                <p className="text-gray-700">{name || "Your Name"}</p>
-              </div>
 
               <form onSubmit={handleUpdate} className="space-y-4">
                 <input
@@ -131,7 +98,6 @@ const Profile = () => {
                   className="input input-bordered w-full border-cyan-300 focus:ring-2 focus:ring-cyan-500"
                   required
                 />
-
                 <div className="flex justify-between mt-5">
                   <button
                     type="submit"

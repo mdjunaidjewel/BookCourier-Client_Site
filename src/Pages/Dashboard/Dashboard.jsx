@@ -1,14 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router";
 import { AuthContext } from "../../Components/Providers/AuthContext/AuthProvider";
-import { useNavigate } from "react-router";
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activePage, setActivePage] = useState("orders");
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // Fetch user orders
   useEffect(() => {
     if (!user?.email) return;
 
@@ -27,7 +28,7 @@ const Dashboard = () => {
       body: JSON.stringify({ status: "cancelled" }),
     })
       .then((res) => res.json())
-      .then((updated) => {
+      .then(() => {
         setOrders((prev) =>
           prev.map((order) =>
             order._id === orderId ? { ...order, status: "cancelled" } : order
@@ -40,16 +41,18 @@ const Dashboard = () => {
     navigate(`/payment/${order._id}`, { state: { order } });
   };
 
+  // Sidebar items
   const sidebarItems = [
-    { label: "My Orders", key: "orders" },
-    { label: "My Profile", key: "profile" },
-    { label: "Invoice", key: "invoice" },
+    { label: "My Orders", path: "/dashboard" },
+    { label: "My Profile", path: "/dashboard/profile" },
+    { label: "Invoice", path: "/dashboard/invoice" },
   ];
 
   return (
     <div className="drawer lg:drawer-open">
       <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex flex-col">
+        {/* Navbar */}
         <nav className="navbar w-full bg-base-300">
           <label htmlFor="my-drawer-4" className="btn btn-square btn-ghost">
             <span>☰</span>
@@ -57,8 +60,10 @@ const Dashboard = () => {
           <div className="px-4 font-bold text-lg">User Dashboard</div>
         </nav>
 
+        {/* Main content */}
         <div className="p-4 flex-1 overflow-auto">
-          {activePage === "orders" && (
+          {/* Orders table on default route */}
+          {location.pathname === "/dashboard" && (
             <div>
               <h1 className="text-2xl font-bold mb-4">My Orders</h1>
               {loading ? (
@@ -109,21 +114,22 @@ const Dashboard = () => {
             </div>
           )}
 
-          {activePage === "profile" && <p>Profile page</p>}
-          {activePage === "invoice" && <p>Invoice page</p>}
+          {/* Render child route content (Profile / Invoice) */}
+          <Outlet context={{ orders, loading }} />
         </div>
       </div>
 
+      {/* Sidebar */}
       <div className="drawer-side">
         <label htmlFor="my-drawer-4" className="drawer-overlay"></label>
         <div className="bg-base-200 w-64 p-2">
           {sidebarItems.map((item) => (
             <button
-              key={item.key}
+              key={item.path}
               className={`w-full text-left mb-1 ${
-                activePage === item.key ? "font-bold bg-base-300" : ""
+                location.pathname === item.path ? "font-bold bg-base-300" : ""
               }`}
-              onClick={() => setActivePage(item.key)}
+              onClick={() => navigate(item.path)}
             >
               {item.label}
             </button>

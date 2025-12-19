@@ -10,6 +10,7 @@ import AllBooks from "../../Pages/AllBooks/AllBooks";
 import BookDetails from "../../Pages/AllBooks/BookDetails";
 import Dashboard from "../../Pages/Dashboard/Dashboard";
 import Payment from "../Payment/Payment";
+import Invoice from "../../Pages/Invoice/Invoice";
 
 const router = createBrowserRouter([
   {
@@ -40,19 +41,25 @@ const router = createBrowserRouter([
         element: <PrivateRoute />,
         children: [
           {
-            path: "profile",
-            element: <Profile />,
-          },
-          {
             path: "books/:id",
             element: <BookDetails />,
           },
           {
-            path: "/dashboard",
-            element: <Dashboard></Dashboard>,
+            path: "dashboard",
+            element: <Dashboard />,
+            children: [
+              {
+                path: "profile", // relative path
+                element: <Profile />,
+              },
+              {
+                path: "invoice", // future invoice page
+                element: <Invoice></Invoice>
+              },
+            ],
           },
           {
-            path: "payment/:orderId", // <-- new payment route
+            path: "payment/:orderId",
             element: <Payment />,
           },
         ],
