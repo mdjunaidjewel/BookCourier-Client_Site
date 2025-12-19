@@ -9,6 +9,7 @@ import PrivateRoute from "../PrivateRoute/PrivateRout";
 import AllBooks from "../../Pages/AllBooks/AllBooks";
 import BookDetails from "../../Pages/AllBooks/BookDetails";
 import Dashboard from "../../Pages/Dashboard/Dashboard";
+import Payment from "../Payment/Payment";
 
 const router = createBrowserRouter([
   {
@@ -47,9 +48,13 @@ const router = createBrowserRouter([
             element: <BookDetails />,
           },
           {
-            path: '/dashboard',
-            element:<Dashboard></Dashboard>
-          }
+            path: "/dashboard",
+            element: <Dashboard></Dashboard>,
+          },
+          {
+            path: "payment/:orderId", // <-- new payment route
+            element: <Payment />,
+          },
         ],
       },
     ],
