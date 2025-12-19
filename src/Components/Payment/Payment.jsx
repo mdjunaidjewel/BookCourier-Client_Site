@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router";
+import { useParams, useLocation, useNavigate } from "react-router";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -11,55 +11,53 @@ import {
 } from "@stripe/react-stripe-js";
 import Swal from "sweetalert2";
 
-const stripePromise = loadStripe("pk_test_XXXXXXXXXXXXXXXXXXXX"); // Frontend test key
+const stripePromise = loadStripe(
+  "pk_test_51Sg40ALDih2MfrK38jgrynU8yyfT9FVczHCcJEa2A1Uz3dETRDoW0l2KlknksEIPUbz0bWZmdmtO2quj8FHx0Fl300ou8EPPcc"
+);
 
-// ----- Checkout Form -----
+// CheckoutForm
 const CheckoutForm = ({ order }) => {
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
 
   const handlePayment = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) return;
-    setProcessing(true);
 
+    setProcessing(true);
     try {
-      // 1️⃣ Create Payment Intent from backend
+      // Create Payment Intent
       const res = await fetch(
         "http://localhost:3000/api/create-payment-intent",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: order.price * 100 }), // cents
+          body: JSON.stringify({ amount: order.price * 100 }), // convert $ to cents
         }
       );
-
       const data = await res.json();
-      if (!data.clientSecret) throw new Error("No clientSecret returned");
 
-      // 2️⃣ Confirm Payment
       const result = await stripe.confirmCardPayment(data.clientSecret, {
         payment_method: {
           card: elements.getElement(CardNumberElement),
-          billing_details: {
-            name: order.name,
-            email: order.email,
-          },
+          billing_details: { name: order.name, email: order.email },
         },
       });
 
       if (result.error) {
         Swal.fire("Error", result.error.message, "error");
-      } else if (result.paymentIntent?.status === "succeeded") {
-        // 3️⃣ Update order status in backend
+      } else if (result.paymentIntent.status === "succeeded") {
+        // Update order
         await fetch(`http://localhost:3000/api/orders/${order._id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ paymentStatus: "paid", status: "completed" }),
         });
-
-        Swal.fire("Success!", "Payment completed (test mode)", "success");
+        Swal.fire("Success", "Payment completed!", "success").then(() => {
+          navigate("/dashboard");
+        });
       }
     } catch (err) {
       Swal.fire("Error", err.message, "error");
@@ -71,43 +69,30 @@ const CheckoutForm = ({ order }) => {
   return (
     <form
       onSubmit={handlePayment}
-      className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md border"
+      className="max-w-md mx-auto p-6 bg-white rounded shadow mt-10"
     >
-      <h2 className="text-2xl font-bold mb-6 text-center">
-        Pay for <span className="text-green-600">{order.bookTitle}</span>
-      </h2>
-
-      {/* Card Number */}
-      <label className="block mb-1 font-semibold">Card Number</label>
-      <div className="mb-4 p-2 border rounded">
-        <CardNumberElement options={{ showIcon: true }} />
+      <h2 className="text-xl font-bold mb-4">Pay for {order.bookTitle}</h2>
+      <label>Card Number</label>
+      <div className="border p-2 mb-2">
+        <CardNumberElement />
       </div>
-
-      {/* Expiry & CVC */}
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-2 mb-2">
         <div className="flex-1">
-          <label className="block mb-1 font-semibold">Expiry</label>
-          <div className="p-2 border rounded">
+          <label>Expiry</label>
+          <div className="border p-2">
             <CardExpiryElement />
           </div>
         </div>
         <div className="flex-1">
-          <label className="block mb-1 font-semibold">CVC</label>
-          <div className="p-2 border rounded">
+          <label>CVC</label>
+          <div className="border p-2">
             <CardCvcElement />
           </div>
         </div>
       </div>
-
-      {/* Pay Button */}
       <button
         type="submit"
-        disabled={processing}
-        className={`w-full py-3 mt-4 text-white font-semibold rounded-lg transition ${
-          processing
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-green-600 hover:bg-green-700"
-        }`}
+        className="w-full bg-green-600 text-white py-2 rounded"
       >
         {processing ? "Processing..." : `Pay $${order.price}`}
       </button>
@@ -115,30 +100,23 @@ const CheckoutForm = ({ order }) => {
   );
 };
 
-// ----- Payment Page -----
+// Payment page
 const Payment = () => {
   const { orderId } = useParams();
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const [order, setOrder] = useState(location.state?.order || null);
+  const [loading, setLoading] = useState(!order);
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/api/orders/${orderId}`);
-        const data = await res.json();
-        setOrder(data);
-      } catch (err) {
-        console.error(err);
-        Swal.fire("Error", "Failed to load order", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrder();
-  }, [orderId]);
+    if (order) return;
+    fetch(`http://localhost:3000/api/orders/${orderId}`)
+      .then((res) => res.json())
+      .then((data) => setOrder(data))
+      .catch(() => Swal.fire("Error", "Failed to load order", "error"))
+      .finally(() => setLoading(false));
+  }, [orderId, order]);
 
-  if (loading)
-    return <p className="text-center mt-10 text-gray-500">Loading order...</p>;
+  if (loading) return <p className="text-center mt-10">Loading...</p>;
   if (!order)
     return <p className="text-center mt-10 text-red-500">Order not found!</p>;
 
