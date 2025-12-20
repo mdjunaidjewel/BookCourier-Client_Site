@@ -1,112 +1,88 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { AuthContext } from "../../../Components/Providers/AuthContext/AuthProvider";
 import Swal from "sweetalert2";
 
 const MyBooks = () => {
+  const { user } = useContext(AuthContext);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Load all books
-  const fetchBooks = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/books");
-      const data = await res.json();
-      setBooks(data);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchBooks();
-  }, []);
+    const fetchBooks = async () => {
+      if (!user) return;
 
-  // Toggle publish/unpublish
-  const handleToggleStatus = async (book) => {
-    try {
-      const updatedBook = {
-        status: book.status === "published" ? "unpublished" : "published",
-      };
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch("http://localhost:3000/api/books/librarian", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
 
-      const res = await fetch(`http://localhost:3000/api/books/${book._id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedBook),
-      });
-
-      if (res.ok) {
-        Swal.fire("Success", `Book is now ${updatedBook.status}`, "success");
-        fetchBooks();
+        // ensure data is array
+        if (Array.isArray(data)) setBooks(data);
+        else setBooks([]);
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Failed to fetch books", "error");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      Swal.fire("Error", err.message, "error");
-    }
+    };
+
+    fetchBooks();
+  }, [user]);
+
+  const handleEdit = (bookId) => {
+    navigate(`/dashboard/edit-book/${bookId}`);
   };
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (loading)
+    return <p className="text-center mt-10 text-gray-600">Loading...</p>;
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">My Books</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border rounded">
-          <thead className="bg-gray-100">
+    <div className="max-w-5xl mx-auto mt-10 p-4 bg-white shadow rounded">
+      <h2 className="text-2xl font-bold mb-4">My Books</h2>
+      {books.length === 0 ? (
+        <p className="text-center text-gray-500">No books added yet.</p>
+      ) : (
+        <table className="w-full table-auto border-collapse">
+          <thead>
             <tr>
-              <th className="px-4 py-2 border">Book Name</th>
-              <th className="px-4 py-2 border">Image</th>
-              <th className="px-4 py-2 border">Status</th>
-              <th className="px-4 py-2 border">Actions</th>
+              <th className="border px-4 py-2">Title</th>
+              <th className="border px-4 py-2">Image</th>
+              <th className="border px-4 py-2">Status</th>
+              <th className="border px-4 py-2">Action</th>
             </tr>
           </thead>
           <tbody>
             {books.map((book) => (
-              <tr key={book._id} className="text-center">
-                <td className="px-4 py-2 border">{book.title}</td>
-                <td className="px-4 py-2 border">
-                  {book.image ? (
+              <tr key={book._id}>
+                <td className="border px-4 py-2">{book.title}</td>
+                <td className="border px-4 py-2">
+                  {book.image && (
                     <img
                       src={book.image}
                       alt={book.title}
-                      className="w-16 h-16 object-cover mx-auto"
+                      className="w-16 h-16 object-cover"
                     />
-                  ) : (
-                    "No Image"
                   )}
                 </td>
-                <td className="px-4 py-2 border capitalize">{book.status}</td>
-                <td className="px-4 py-2 border space-x-2">
+                <td className="border px-4 py-2 capitalize">{book.status}</td>
+                <td className="border px-4 py-2">
                   <button
-                    onClick={() => handleToggleStatus(book)}
-                    className={`px-3 py-1 rounded text-white ${
-                      book.status === "published"
-                        ? "bg-red-600 hover:bg-red-700"
-                        : "bg-green-600 hover:bg-green-700"
-                    }`}
-                  >
-                    {book.status === "published" ? "Unpublish" : "Publish"}
-                  </button>
-                  <button
-                    onClick={() => navigate(`/edit-book/${book._id}`)}
-                    className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    onClick={() => handleEdit(book._id)}
+                    className="px-4 py-1 bg-green-600 text-white rounded"
                   >
                     Edit
                   </button>
                 </td>
               </tr>
             ))}
-            {books.length === 0 && (
-              <tr>
-                <td colSpan="4" className="py-4">
-                  No books found.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
-      </div>
+      )}
     </div>
   );
 };

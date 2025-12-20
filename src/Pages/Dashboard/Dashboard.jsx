@@ -11,7 +11,7 @@ import {
 } from "react-icons/fa";
 
 const Dashboard = () => {
-  const { role } = useContext(AuthContext);
+  const { role, jwtToken } = useContext(AuthContext); // JWT & role from AuthContext
   const [activePage, setActivePage] = useState("home");
   const navigate = useNavigate();
 
@@ -84,9 +84,23 @@ const Dashboard = () => {
     navigate(item.path);
   };
 
+  // Helper: fetch with JWT
+  const fetchWithJWT = async (url, options = {}) => {
+    const headers = {
+      ...options.headers,
+      Authorization: `Bearer ${jwtToken}`,
+      "Content-Type": "application/json",
+    };
+    const res = await fetch(url, { ...options, headers });
+    if (!res.ok) throw new Error("Failed to fetch data");
+    return res.json();
+  };
+
   return (
     <div className="drawer lg:drawer-open min-h-screen bg-gray-50">
       <input id="my-drawer" type="checkbox" className="drawer-toggle" />
+
+      {/* Main content */}
       <div className="drawer-content flex flex-col">
         {/* Navbar */}
         <nav className="navbar bg-base-300 w-full shadow-md px-4">
@@ -101,7 +115,7 @@ const Dashboard = () => {
 
         {/* Page content */}
         <div className="p-6 flex-1 overflow-auto">
-          <Outlet />
+          <Outlet context={{ jwtToken, fetchWithJWT }} />
         </div>
       </div>
 
@@ -116,13 +130,13 @@ const Dashboard = () => {
             <button
               key={item.key}
               onClick={() => handleSidebarClick(item)}
-              className={`cursor-pointer flex items-center gap-3 px-4 py-2 mb-2 rounded-lg hover:bg-cyan-100 transition-all ${
+              className={`flex items-center gap-3 px-4 py-2 mb-2 rounded-lg hover:bg-cyan-100 transition-all ${
                 activePage === item.key
                   ? "bg-cyan-200 font-semibold shadow-inner"
                   : "text-gray-700"
               }`}
             >
-              <span className="text-cyan-600 cursor-pointer">{item.icon}</span>
+              <span className="text-cyan-600">{item.icon}</span>
               <span>{item.label}</span>
             </button>
           ))}

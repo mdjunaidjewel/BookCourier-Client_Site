@@ -1,42 +1,34 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../Components/Providers/AuthContext/AuthProvider";
 import { NavLink, useNavigate } from "react-router";
 import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
 import Swal from "sweetalert2";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../../Firebase/firebase_config";
 
 const Login = () => {
-  const { user, loginUser } = useContext(AuthContext);
+  const { user, loginUser, googleLogin, jwtToken } = useContext(AuthContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // redirect if already logged in
   useEffect(() => {
-    if (user) {
-      navigate("/", { replace: true });
-    } else {
-      setLoading(false);
-    }
+    if (user) navigate("/", { replace: true });
+    else setLoading(false);
   }, [user, navigate]);
 
   // ================= EMAIL LOGIN =================
   const handleEmailLogin = async (e) => {
     e.preventDefault();
-
     try {
-      const result = await loginUser(email, password);
-      const loggedUser = result.user;
+      const loggedUser = await loginUser(email, password);
 
-      // save email user to mongodb (if not exists)
+      // Backend API call to ensure user exists or updated
       await fetch("http://localhost:3000/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
         },
         body: JSON.stringify({
           name: loggedUser.displayName || "User",
@@ -54,23 +46,20 @@ const Login = () => {
 
   // ================= GOOGLE LOGIN =================
   const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-
     try {
-      const result = await signInWithPopup(auth, provider);
-      const loggedUser = result.user;
+      const loggedUser = await googleLogin();
 
-      // save google user to mongodb
       await fetch("http://localhost:3000/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
         },
         body: JSON.stringify({
-          name: loggedUser.displayName,
+          name: loggedUser.displayName || "User",
           email: loggedUser.email,
-          photoURL: loggedUser.photoURL,
           provider: "google",
+          photoURL: loggedUser.photoURL,
         }),
       });
 

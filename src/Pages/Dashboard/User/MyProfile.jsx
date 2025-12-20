@@ -1,6 +1,6 @@
 import React from 'react';
 
-const UserOders = () => {
+const MyProfile = () => {
     return (
         <div>
             
@@ -8,4 +8,4 @@ const UserOders = () => {
     );
 };
 
-export default UserOders;
+export default MyProfile;

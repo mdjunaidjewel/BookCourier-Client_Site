@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../Components/Providers/AuthContext/AuthProvider";
+import { AuthContext } from "../../../Components/Providers/AuthContext/AuthProvider";
+import Swal from "sweetalert2";
 
 const Invoice = () => {
   const { user } = useContext(AuthContext);
@@ -7,20 +8,34 @@ const Invoice = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?.email) return;
+    const fetchPaidOrders = async () => {
+      if (!user?.email) return;
 
-    fetch(`http://localhost:3000/api/orders/user/${user.email}`)
-      .then((res) => res.json())
-      .then((data) => {
-        // filter only paid orders
+      try {
+        const token = await user.getIdToken(); // Firebase JWT
+        const res = await fetch(
+          `http://localhost:3000/api/orders/user/${user.email}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch orders");
+
+        const data = await res.json();
         const paid = data.filter((order) => order.paymentStatus === "paid");
         setPaidOrders(paid);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error(err);
+        Swal.fire("Error", err.message, "error");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchPaidOrders();
   }, [user]);
 
   if (loading) {
@@ -53,7 +68,7 @@ const Invoice = () => {
               <tr key={order._id}>
                 <td>{index + 1}</td>
                 <td>{order.bookTitle || "N/A"}</td>
-                <td>{order._id}</td> {/* Using order ID as Payment ID */}
+                <td>{order._id}</td> {/* Order ID as Payment ID */}
                 <td>{order.price}</td>
                 <td>{new Date(order.createdAt).toLocaleDateString()}</td>
               </tr>

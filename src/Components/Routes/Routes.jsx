@@ -10,83 +10,95 @@ import AllBooks from "../../Pages/AllBooks/AllBooks";
 import BookDetails from "../../Pages/AllBooks/BookDetails";
 import Dashboard from "../../Pages/Dashboard/Dashboard";
 import Payment from "../Payment/Payment";
-import Invoice from "../../Pages/Invoice/Invoice";
-import Orders from "../../Pages/Dashboard/Librarian/Orders";
+
+// Librarian
+import OrdersLibrarian from "../../Pages/Dashboard/Librarian/LibrarianOrders";
 import AddBook from "../../Pages/Dashboard/Librarian/AddBook";
 import MyBooks from "../../Pages/Dashboard/Librarian/MyBooks";
+
+// Admin
 import ManageBooks from "../../Pages/Dashboard/Admin/ManageBooks";
 import AllUsers from "../../Pages/Dashboard/Admin/AllUsers";
+
+// Edit book (Librarian)
+import EditBook from "../../Pages/Dashboard/EditBook/EditBook";
+
+// User Orders
+import OrdersUser from "../../Pages/Dashboard/User/MyOders";
+import Invoice from "../../Pages/Dashboard/User/Invoice";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
     children: [
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "login",
-        element: <Login />,
-      },
-      {
-        path: "register",
-        element: <Register />,
-      },
+      { index: true, element: <Home /> },
+      { path: "login", element: <Login /> },
+      { path: "register", element: <Register /> },
 
-      // ---------- BOOK ROUTES ----------
-      {
-        path: "books",
-        element: <AllBooks />,
-      },
+      // ---------- PUBLIC BOOK ROUTES ----------
+      { path: "books", element: <AllBooks /> },
 
       // ---------- PRIVATE ROUTES ----------
       {
         element: <PrivateRoute />,
         children: [
-          {
-            path: "books/:id",
-            element: <BookDetails />,
-          },
+          { path: "books/:id", element: <BookDetails /> },
+
+          // ---------- DASHBOARD ----------
           {
             path: "dashboard",
             element: <Dashboard />,
             children: [
+              // ----- USER -----
               {
-                path: "profile", // relative path
+                path: "orders",
+                element: <OrdersUser />,
+              },
+              {
+                path: "profile",
                 element: <Profile />,
               },
               {
-                path: "invoice", // future invoice page
-                element: <Invoice></Invoice>
-              },
-              {
-                path: 'orders',
-                element:<Orders></Orders>
+                path: "invoice",
+                element: <Invoice />,
               },
 
-              // Add book for Librarian
+              // ----- LIBRARIAN -----
               {
-                path: 'add-book',
-                element:<AddBook></AddBook>
+                path: "add-book",
+                element: <AddBook />,
               },
               {
-                path: 'my-books',
-                element:<MyBooks></MyBooks>
+                path: "my-books",
+                element: <MyBooks />,
+              },
+              {
+                path: "librarian-orders",
+                element: <OrdersLibrarian />,
+              },
+              {
+                path: "edit-book/:id",
+                element: <EditBook />,
               },
 
-              // Admin book manage
+              // ----- ADMIN -----
               {
-                path: 'books',
-                element: <ManageBooks></ManageBooks>
+                path: "admin/books",
+                element: <ManageBooks />,
               },
               {
-                path: 'users',
-                element:<AllUsers></AllUsers>
-              }
+                path: "admin/users",
+                element: <AllUsers />,
+              },
+              {
+                path: "admin/orders",
+                element: <OrdersLibrarian />, // Admin can see all orders
+              },
             ],
           },
+
+          // ---------- PAYMENT ----------
           {
             path: "payment/:orderId",
             element: <Payment />,
@@ -97,10 +109,7 @@ const router = createBrowserRouter([
   },
 
   // ---------- NOT FOUND ----------
-  {
-    path: "*",
-    element: <NotFound />,
-  },
+  { path: "*", element: <NotFound /> },
 ]);
 
 export default router;
