@@ -64,7 +64,6 @@ const router = createBrowserRouter([
               // ----- ADMIN -----
               { path: "admin/books", element: <ManageBooks /> },
               { path: "admin/users", element: <AllUsers /> },
-              { path: "admin/orders", element: <OrdersLibrarian /> }, // Admin sees all orders
             ],
           },
 

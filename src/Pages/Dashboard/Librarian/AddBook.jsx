@@ -26,15 +26,22 @@ const AddBook = () => {
 
     const token = await user.getIdToken();
     try {
+      // Send both email and name to backend
       const res = await fetch("http://localhost:3000/api/books", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ ...book, addedByEmail: user.email }),
+        body: JSON.stringify({
+          ...book,
+          addedByEmail: user.email,
+          addedByName: user.displayName || "Unknown", // ✨ নাম পাঠাচ্ছি
+        }),
       });
+
       const data = await res.json();
+
       if (res.ok) {
         Swal.fire("Success", "Book added successfully", "success");
         setBook({

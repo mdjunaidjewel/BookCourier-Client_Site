@@ -1,17 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { AuthContext } from "../../../Components/Providers/AuthContext/AuthProvider";
 
 const AllUsers = () => {
+  const { jwtToken, user: currentUser } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load all users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/users");
-        setUsers(res.data || []);
+        const res = await axios.get("http://localhost:3000/api/users", {
+          headers: { Authorization: `Bearer ${jwtToken}` },
+        });
+
+        // Filter out the logged-in admin using email
+        const filteredUsers = res.data.filter(
+          (u) => u.email !== currentUser.email
+        );
+
+        setUsers(filteredUsers || []);
       } catch (err) {
         console.error("Failed to fetch users:", err.message);
       } finally {
@@ -19,14 +28,16 @@ const AllUsers = () => {
       }
     };
     fetchUsers();
-  }, []);
+  }, [jwtToken, currentUser]);
 
-  // Update user role
   const handleRoleChange = async (userId, newRole) => {
     try {
       const res = await axios.patch(
         `http://localhost:3000/api/users/${userId}`,
-        { role: newRole }
+        { role: newRole },
+        {
+          headers: { Authorization: `Bearer ${jwtToken}` },
+        }
       );
       setUsers((prev) =>
         prev.map((user) => (user._id === userId ? res.data : user))
