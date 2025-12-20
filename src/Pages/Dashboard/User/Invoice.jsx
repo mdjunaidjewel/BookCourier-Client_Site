@@ -1,3 +1,4 @@
+// src/Pages/User/Invoice.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../Components/Providers/AuthContext/AuthProvider";
 import Swal from "sweetalert2";
@@ -12,19 +13,18 @@ const Invoice = () => {
       if (!user?.email) return;
 
       try {
-        const token = await user.getIdToken(); // Firebase JWT
+        const token = await user.getIdToken();
         const res = await fetch(
           `http://localhost:3000/api/orders/user/${user.email}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
         if (!res.ok) throw new Error("Failed to fetch orders");
 
         const data = await res.json();
+        // Filter only paid orders
         const paid = data.filter((order) => order.paymentStatus === "paid");
         setPaidOrders(paid);
       } catch (err) {
@@ -67,8 +67,8 @@ const Invoice = () => {
             {paidOrders.map((order, index) => (
               <tr key={order._id}>
                 <td>{index + 1}</td>
-                <td>{order.bookTitle || "N/A"}</td>
-                <td>{order._id}</td> {/* Order ID as Payment ID */}
+                <td>{order.bookId?.title || "N/A"}</td>
+                <td>{order._id}</td> {/* Using Order ID as Payment ID */}
                 <td>{order.price}</td>
                 <td>{new Date(order.createdAt).toLocaleDateString()}</td>
               </tr>

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Outlet, useNavigate } from "react-router";
 import { AuthContext } from "../../Components/Providers/AuthContext/AuthProvider";
 import {
@@ -11,136 +11,155 @@ import {
 } from "react-icons/fa";
 
 const Dashboard = () => {
-  const { role, jwtToken } = useContext(AuthContext); // JWT & role from AuthContext
-  const [activePage, setActivePage] = useState("home");
+  const { role, jwtToken } = useContext(AuthContext); // JWT & role
   const navigate = useNavigate();
+  const [active, setActive] = useState("");
 
-  // Sidebar menu based on role
-  const sidebarItems = {
+  // ---------- ROLE BASED MENUS ----------
+  const menus = {
     user: [
       {
-        label: "My Orders",
         key: "orders",
+        label: "My Orders",
         path: "/dashboard/orders",
         icon: <FaShoppingCart />,
       },
       {
-        label: "Profile",
         key: "profile",
+        label: "Profile",
         path: "/dashboard/profile",
         icon: <FaUser />,
       },
       {
-        label: "Invoice",
         key: "invoice",
+        label: "Invoice",
         path: "/dashboard/invoice",
         icon: <FaFileInvoice />,
       },
     ],
+
     librarian: [
       {
+        key: "add-book",
         label: "Add Book",
-        key: "addBook",
         path: "/dashboard/add-book",
         icon: <FaPlus />,
       },
       {
+        key: "my-books",
         label: "My Books",
-        key: "myBooks",
         path: "/dashboard/my-books",
         icon: <FaBook />,
       },
       {
-        label: "Orders",
         key: "orders",
-        path: "/dashboard/orders",
+        label: "Orders",
+        path: "/dashboard/librarian-orders",
         icon: <FaShoppingCart />,
       },
     ],
+
     admin: [
       {
-        label: "All Users",
         key: "users",
+        label: "All Users",
         path: "/dashboard/users",
         icon: <FaUsers />,
       },
       {
-        label: "All Books",
         key: "books",
+        label: "All Books",
         path: "/dashboard/books",
         icon: <FaBook />,
       },
       {
-        label: "All Orders",
         key: "orders",
+        label: "All Orders",
         path: "/dashboard/orders",
         icon: <FaShoppingCart />,
       },
     ],
   };
 
-  const handleSidebarClick = (item) => {
-    setActivePage(item.key);
+  // ---------- HANDLE NAVIGATION ----------
+  const handleNavigate = (item) => {
+    setActive(item.key);
     navigate(item.path);
   };
 
-  // Helper: fetch with JWT
+  // ---------- FETCH WITH JWT HELPER ----------
   const fetchWithJWT = async (url, options = {}) => {
-    const headers = {
-      ...options.headers,
-      Authorization: `Bearer ${jwtToken}`,
-      "Content-Type": "application/json",
-    };
-    const res = await fetch(url, { ...options, headers });
-    if (!res.ok) throw new Error("Failed to fetch data");
+    if (!jwtToken) throw new Error("No JWT token found");
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+        ...(options.headers || {}),
+      },
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Request failed");
+    }
+
     return res.json();
   };
 
-  return (
-    <div className="drawer lg:drawer-open min-h-screen bg-gray-50">
-      <input id="my-drawer" type="checkbox" className="drawer-toggle" />
+  // ---------- REDIRECT IF NO ROLE ----------
+  useEffect(() => {
+    if (!role) {
+      navigate("/login"); // যদি role undefined হয়
+    }
+  }, [role, navigate]);
 
-      {/* Main content */}
+  return (
+    <div className="drawer lg:drawer-open min-h-screen bg-gray-100">
+      <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
+
+      {/* ---------- MAIN CONTENT ---------- */}
       <div className="drawer-content flex flex-col">
-        {/* Navbar */}
-        <nav className="navbar bg-base-300 w-full shadow-md px-4">
+        <nav className="navbar bg-white shadow px-4">
           <label
-            htmlFor="my-drawer"
+            htmlFor="dashboard-drawer"
             className="btn btn-square btn-ghost lg:hidden"
           >
             ☰
           </label>
-          <span className="font-bold text-lg ml-2">Dashboard</span>
+          <h1 className="text-xl font-bold ml-2">Dashboard</h1>
         </nav>
 
-        {/* Page content */}
         <div className="p-6 flex-1 overflow-auto">
-          <Outlet context={{ jwtToken, fetchWithJWT }} />
+          {/* Outlet passes JWT & role to child routes */}
+          <Outlet context={{ fetchWithJWT, role, jwtToken }} />
         </div>
       </div>
 
-      {/* Sidebar */}
+      {/* ---------- SIDEBAR ---------- */}
       <div className="drawer-side">
-        <label htmlFor="my-drawer" className="drawer-overlay"></label>
-        <div className="bg-white w-64 shadow-lg p-4 flex flex-col">
-          <h2 className="text-2xl font-bold text-cyan-700 mb-6 text-center">
-            Menu
+        <label htmlFor="dashboard-drawer" className="drawer-overlay" />
+        <aside className="w-64 bg-white shadow-lg p-4">
+          <h2 className="text-2xl font-bold text-center text-cyan-700 mb-6">
+            {role?.toUpperCase()} PANEL
           </h2>
-          {(sidebarItems[role] || []).map((item) => (
+
+          {(menus[role] || []).map((item) => (
             <button
               key={item.key}
-              onClick={() => handleSidebarClick(item)}
-              className={`flex items-center gap-3 px-4 py-2 mb-2 rounded-lg hover:bg-cyan-100 transition-all ${
-                activePage === item.key
-                  ? "bg-cyan-200 font-semibold shadow-inner"
-                  : "text-gray-700"
-              }`}
+              onClick={() => handleNavigate(item)}
+              className={`flex items-center gap-3 w-full px-4 py-2 mb-2 rounded-lg transition
+                ${
+                  active === item.key
+                    ? "bg-cyan-200 font-semibold"
+                    : "hover:bg-cyan-100 text-gray-700"
+                }`}
             >
-              <span className="text-cyan-600">{item.icon}</span>
+              <span className="text-lg text-cyan-600">{item.icon}</span>
               <span>{item.label}</span>
             </button>
           ))}
-        </div>
+        </aside>
       </div>
     </div>
   );

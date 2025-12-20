@@ -1,13 +1,13 @@
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../Components/Providers/AuthContext/AuthProvider";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router";
 
 const BookDetails = () => {
   const { id } = useParams();
-  const { user, jwtToken } = useContext(AuthContext);
+  const { user } = useContext(AuthContext); // Firebase user
   const navigate = useNavigate();
+
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -37,10 +37,11 @@ const BookDetails = () => {
     const fetchUserRole = async () => {
       if (!user) return;
       try {
+        const token = await user.getIdToken(true); // Get Firebase JWT
         const res = await fetch(
           `http://localhost:3000/api/users/${user.email}`,
           {
-            headers: { Authorization: `Bearer ${jwtToken}` },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
         const data = await res.json();
@@ -50,7 +51,7 @@ const BookDetails = () => {
       }
     };
     fetchUserRole();
-  }, [user, jwtToken]);
+  }, [user]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -67,25 +68,27 @@ const BookDetails = () => {
       return;
     }
 
-    const orderData = {
-      bookId: book._id,
-      bookTitle: book.title,
-      name: user.displayName || "User",
-      email: user.email,
-      phone: formData.phone,
-      address: formData.address,
-      price: book.price,
-    };
-
     try {
+      const token = await user.getIdToken(true); // Firebase JWT
+      const orderData = {
+        bookId: book._id,
+        bookTitle: book.title,
+        name: user.displayName || "User",
+        email: user.email,
+        phone: formData.phone,
+        address: formData.address,
+        price: book.price,
+      };
+
       const res = await fetch("http://localhost:3000/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(orderData),
       });
+
       const data = await res.json();
 
       if (res.ok) {
@@ -120,7 +123,6 @@ const BookDetails = () => {
         Added by: {book.addedByName || "Unknown"}
       </p>
 
-      {/* Only normal users can order */}
       {userRole === "user" && (
         <button
           onClick={() => setModalOpen(true)}

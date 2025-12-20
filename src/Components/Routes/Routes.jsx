@@ -51,58 +51,25 @@ const router = createBrowserRouter([
             element: <Dashboard />,
             children: [
               // ----- USER -----
-              {
-                path: "orders",
-                element: <OrdersUser />,
-              },
-              {
-                path: "profile",
-                element: <Profile />,
-              },
-              {
-                path: "invoice",
-                element: <Invoice />,
-              },
+              { path: "orders", element: <OrdersUser /> },
+              { path: "profile", element: <Profile /> },
+              { path: "invoice", element: <Invoice /> },
 
               // ----- LIBRARIAN -----
-              {
-                path: "add-book",
-                element: <AddBook />,
-              },
-              {
-                path: "my-books",
-                element: <MyBooks />,
-              },
-              {
-                path: "librarian-orders",
-                element: <OrdersLibrarian />,
-              },
-              {
-                path: "edit-book/:id",
-                element: <EditBook />,
-              },
+              { path: "add-book", element: <AddBook /> },
+              { path: "my-books", element: <MyBooks /> },
+              { path: "librarian-orders", element: <OrdersLibrarian /> },
+              { path: "edit-book/:id", element: <EditBook /> },
 
               // ----- ADMIN -----
-              {
-                path: "admin/books",
-                element: <ManageBooks />,
-              },
-              {
-                path: "admin/users",
-                element: <AllUsers />,
-              },
-              {
-                path: "admin/orders",
-                element: <OrdersLibrarian />, // Admin can see all orders
-              },
+              { path: "admin/books", element: <ManageBooks /> },
+              { path: "admin/users", element: <AllUsers /> },
+              { path: "admin/orders", element: <OrdersLibrarian /> }, // Admin sees all orders
             ],
           },
 
           // ---------- PAYMENT ----------
-          {
-            path: "payment/:orderId",
-            element: <Payment />,
-          },
+          { path: "payment/:orderId", element: <Payment /> },
         ],
       },
     ],
