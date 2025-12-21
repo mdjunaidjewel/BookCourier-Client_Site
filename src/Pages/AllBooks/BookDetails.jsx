@@ -20,7 +20,9 @@ const BookDetails = () => {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/books/${id}`);
+        const res = await fetch(
+          `https://bookscourier.vercel.app/api/books/${id}`
+        );
         if (!res.ok) throw new Error("Book not found");
         const data = await res.json();
         setTimeout(() => {
@@ -46,15 +48,18 @@ const BookDetails = () => {
         const token = await user.getIdToken(true);
 
         const resUser = await fetch(
-          `http://localhost:3000/api/users/${user.email}`,
+          `https://bookscourier.vercel.app/api/users/${user.email}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const userData = await resUser.json();
         setUserRole(userData?.role || "user");
 
-        const resWishlist = await fetch("http://localhost:3000/api/wishlist", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const resWishlist = await fetch(
+          "https://bookscourier.vercel.app/api/wishlist",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const wishlistData = await resWishlist.json();
         const exists = wishlistData.some((item) => item.bookId._id === id);
         setWishlistAdded(exists);
@@ -92,7 +97,7 @@ const BookDetails = () => {
         price: book.price,
       };
 
-      const res = await fetch("http://localhost:3000/api/orders", {
+      const res = await fetch("https://bookscourier.vercel.app/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,7 +128,7 @@ const BookDetails = () => {
     }
     try {
       const token = await user.getIdToken(true);
-      const res = await fetch("http://localhost:3000/api/wishlist", {
+      const res = await fetch("https://bookscourier.vercel.app/api/wishlist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -152,14 +157,17 @@ const BookDetails = () => {
 
     try {
       const token = await user.getIdToken(true);
-      const res = await fetch(`http://localhost:3000/api/books/${id}/reviews`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ rating: selectedRating }),
-      });
+      const res = await fetch(
+        `https://bookscourier.vercel.app/api/books/${id}/reviews`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ rating: selectedRating }),
+        }
+      );
       const data = await res.json();
       if (res.ok) {
         Swal.fire("Success", "Review submitted", "success");
@@ -188,114 +196,106 @@ const BookDetails = () => {
       </p>
     );
 
-  // Calculate average rating
   const averageRating = book.reviews?.length
     ? book.reviews.reduce((sum, r) => sum + r.rating, 0) / book.reviews.length
     : 0;
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-3 sm:p-4 md:p-6 bg-white rounded-xl shadow-lg">
-      {/* Image */}
-      <div className="flex justify-center">
-        <img
-          src={book.image}
-          alt={book.title}
-          className="w-32 sm:w-40 md:w-48 object-cover rounded-lg shadow-md"
-        />
-      </div>
-
-      {/* Title */}
-      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-5 text-center">
-        {book.title}
-      </h2>
-
-      {/* Author */}
-      <p className="text-gray-600 text-center mt-1 text-sm sm:text-base">
-        <span className="font-semibold">Author by:</span> {book.author}
-      </p>
-
-      {/* Description */}
-      <div className="mt-5">
-        <h3 className="text-base sm:text-lg font-semibold mb-1">Description</h3>
-        <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-          {book.description}
-        </p>
-      </div>
-
-      {/* Price */}
-      <p className="mt-4 font-bold text-green-600 text-base sm:text-lg">
-        Price: ${book.price}
-      </p>
-
-      {/* Added By */}
-      <p className="mt-1 text-gray-500 text-xs sm:text-sm">
-        Added by: {book.addedByName || "Unknown"}
-      </p>
-
-      {/* Wishlist & Order */}
-      <div className="flex justify-between items-center mt-5 flex-wrap gap-2">
-        <div className="flex gap-3 flex-wrap">
-          <button
-            onClick={handleWishlist}
-            disabled={wishlistAdded}
-            className={` cursor-pointer px-5 py-2 rounded-lg text-white ${
-              wishlistAdded
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-purple-600 hover:bg-purple-700"
-            } transition`}
-          >
-            {wishlistAdded ? "Wishlisted" : "Add to Wishlist"}
-          </button>
-
-          {userRole === "user" && (
-            <button
-              onClick={() => setModalOpen(true)}
-              className=" cursor-pointer px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              Order Now
-            </button>
-          )}
+    <div className="max-w-4xl mx-auto mt-10 p-4 sm:p-6 bg-white rounded-xl shadow-lg">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+        {/* Left: Image */}
+        <div className="flex-shrink-0 w-full sm:w-48 md:w-56 lg:w-64">
+          <img
+            src={book.image}
+            alt={book.title}
+            className="w-full h-auto rounded-lg shadow-md object-cover"
+          />
         </div>
 
-        {/* Star Rating */}
-        {userRole === "user" && (
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">Rate:</span>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((i) => (
+        {/* Right: Details */}
+        <div className="flex-1 flex flex-col items-start md:items-start">
+          <h2 className="text-2xl sm:text-3xl font-bold">{book.title}</h2>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
+            <span className="font-semibold">Author:</span> {book.author}
+          </p>
+          <p className="mt-2 text-gray-500 text-xs sm:text-sm">
+            Added by: {book.addedByName || "Unknown"}
+          </p>
+
+          <p className="mt-4 font-bold text-green-600 text-base sm:text-lg">
+            Price: ${book.price}
+          </p>
+
+          <div className="mt-3 text-gray-700 text-sm sm:text-base leading-relaxed">
+            {book.description}
+          </div>
+
+          {/* Wishlist & Order Buttons */}
+          <div className="flex flex-wrap gap-3 mt-5">
+            {userRole === "user" && (
+              <>
                 <button
-                  key={i}
-                  onClick={() => handleSubmitReview(i)}
-                  className={`text-lg cursor-pointer ${
-                    rating >= i ? "text-yellow-400" : "text-gray-300"
+                  onClick={handleWishlist}
+                  disabled={wishlistAdded}
+                  className={`px-5 py-2 rounded-lg text-white transition cursor-pointer ${
+                    wishlistAdded
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-purple-600 hover:bg-purple-700"
                   }`}
                 >
-                  ★
+                  {wishlistAdded ? "Wishlisted" : "Add to Wishlist"}
                 </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
 
-      {/* Average Rating Display */}
-      <div className="mt-3 flex items-center gap-1">
-        <span className="font-semibold">Average Rating:</span>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <span
-            key={i}
-            className={`text-lg ${
-              i <= Math.round(averageRating)
-                ? "text-yellow-400"
-                : "text-gray-300"
-            }`}
-          >
-            ★
-          </span>
-        ))}
-        <span className="text-gray-600 ml-2">
-          ({book.reviews?.length || 0} reviews)
-        </span>
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className=" cursor-pointer px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  Order Now
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Star Rating */}
+          {userRole === "user" && (
+            <div className="flex items-center gap-2 mt-4">
+              <span className="font-semibold">Rate:</span>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSubmitReview(i)}
+                    className={`text-lg cursor-pointer ${
+                      rating >= i ? "text-yellow-400" : "text-gray-300"
+                    }`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Average Rating Display */}
+          <div className="flex items-center gap-1 mt-2">
+            <span className="font-semibold">Average Rating:</span>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <span
+                key={i}
+                className={`text-lg ${
+                  i <= Math.round(averageRating)
+                    ? "text-yellow-400"
+                    : "text-gray-300"
+                }`}
+              >
+                ★
+              </span>
+            ))}
+            <span className="text-gray-600 ml-2">
+              ({book.reviews?.length || 0} reviews)
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* ================= Modal ================= */}

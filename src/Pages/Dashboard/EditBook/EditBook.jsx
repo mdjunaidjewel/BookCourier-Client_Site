@@ -13,7 +13,6 @@ const EditBook = () => {
     image: "",
     description: "",
     category: "",
-    quantity: 1,
     price: 0,
     status: "published",
   });
@@ -24,11 +23,14 @@ const EditBook = () => {
     if (!user) return;
     try {
       const token = await user.getIdToken();
-      const res = await fetch(`http://localhost:3000/api/books/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `https://bookscourier.vercel.app/api/books/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await res.json();
       if (res.ok) {
         setBook(data);
@@ -58,14 +60,17 @@ const EditBook = () => {
     e.preventDefault();
     try {
       const token = await user.getIdToken();
-      const res = await fetch(`http://localhost:3000/api/books/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(book),
-      });
+      const res = await fetch(
+        `https://bookscourier.vercel.app/api/books/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(book),
+        }
+      );
       const data = await res.json();
       if (res.ok) {
         Swal.fire("Success", "Book updated successfully!", "success");
@@ -141,31 +146,17 @@ const EditBook = () => {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block font-medium">Quantity</label>
-            <input
-              type="number"
-              name="quantity"
-              value={book.quantity}
-              onChange={handleChange}
-              min="1"
-              className="w-full border p-2 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block font-medium">Price ($)</label>
-            <input
-              type="number"
-              name="price"
-              value={book.price}
-              onChange={handleChange}
-              min="0"
-              step="0.01"
-              className="w-full border p-2 rounded"
-            />
-          </div>
+        <div>
+          <label className="block font-medium">Price ($)</label>
+          <input
+            type="number"
+            name="price"
+            value={book.price}
+            onChange={handleChange}
+            min="0"
+            step="0.01"
+            className="w-full border p-2 rounded"
+          />
         </div>
 
         <div>
@@ -174,7 +165,7 @@ const EditBook = () => {
             name="status"
             value={book.status}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className=" cursor-pointer w-full border p-2 rounded"
           >
             <option value="published">Published</option>
             <option value="unpublished">Unpublished</option>
@@ -183,7 +174,7 @@ const EditBook = () => {
 
         <button
           type="submit"
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
         >
           Update Book
         </button>

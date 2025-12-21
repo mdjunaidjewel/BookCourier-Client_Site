@@ -5,12 +5,13 @@ import { AuthContext } from "../../../Components/Providers/AuthContext/AuthProvi
 const ManageBooks = () => {
   const { jwtToken } = useContext(AuthContext);
   const [books, setBooks] = useState([]);
-  const API_URL = "http://localhost:3000";
+  const API_URL = "https://bookscourier.vercel.app";
 
-  // ================= FETCH BOOKS =================
+  // ================= FETCH ALL BOOKS =================
   const fetchBooks = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/books`, {
+      const res = await fetch(`${API_URL}/api/books/all`, {
+        // নতুন route
         headers: { Authorization: `Bearer ${jwtToken}` },
       });
       if (!res.ok) throw new Error("Failed to fetch books");
@@ -29,7 +30,7 @@ const ManageBooks = () => {
   // ================= PUBLISH / UNPUBLISH =================
   const handleStatusChange = async (id, status) => {
     try {
-      await fetch(`${API_URL}/api/books/${id}`, {
+      const res = await fetch(`${API_URL}/api/books/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -37,8 +38,14 @@ const ManageBooks = () => {
         },
         body: JSON.stringify({ status }),
       });
+
+      if (!res.ok) throw new Error("Failed to update status");
+
       Swal.fire("Success", `Book ${status}`, "success");
-      fetchBooks();
+
+      setBooks((prevBooks) =>
+        prevBooks.map((book) => (book._id === id ? { ...book, status } : book))
+      );
     } catch (err) {
       Swal.fire("Error", err.message, "error");
     }
@@ -62,7 +69,7 @@ const ManageBooks = () => {
         headers: { Authorization: `Bearer ${jwtToken}` },
       });
       Swal.fire("Deleted", "Book and its orders deleted", "success");
-      fetchBooks();
+      setBooks((prevBooks) => prevBooks.filter((book) => book._id !== id));
     } catch (err) {
       Swal.fire("Error", err.message, "error");
     }
@@ -92,27 +99,20 @@ const ManageBooks = () => {
                 <td className="border px-4 py-2">{book.addedByEmail}</td>
                 <td className="border px-4 py-2 capitalize">{book.status}</td>
                 <td className="border px-4 py-2 space-x-2">
-                  {book.status === "published" ? (
-                    <button
-                      onClick={() =>
-                        handleStatusChange(book._id, "unpublished")
-                      }
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                    >
-                      Unpublish
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleStatusChange(book._id, "published")}
-                      className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                    >
-                      Publish
-                    </button>
-                  )}
+                  <select
+                    value={book.status}
+                    onChange={(e) =>
+                      handleStatusChange(book._id, e.target.value)
+                    }
+                    className="border px-2 py-1 rounded bg-white cursor-pointer"
+                  >
+                    <option value="published">Publish</option>
+                    <option value="unpublished">Unpublish</option>
+                  </select>
 
                   <button
                     onClick={() => handleDelete(book._id)}
-                    className="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
+                    className="ml-2 cursor-pointer px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
                   >
                     Delete
                   </button>

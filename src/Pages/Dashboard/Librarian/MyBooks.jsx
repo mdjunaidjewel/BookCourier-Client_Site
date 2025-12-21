@@ -19,23 +19,18 @@ const MyBooks = () => {
       try {
         const token = await user.getIdToken(true);
 
-        const res = await fetch("http://localhost:3000/api/books/librarian", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          "https://bookscourier.vercel.app/api/books/librarian",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        console.log("Fetch status:", res.status);
-
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error("Backend error:", errText);
-          throw new Error("Failed to fetch books");
-        }
+        if (!res.ok) throw new Error("Failed to fetch books");
 
         const data = await res.json();
-        console.log("Fetched books:", data);
-
         setBooks(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error(error);
@@ -52,40 +47,6 @@ const MyBooks = () => {
     fetchMyBooks();
   }, [user]);
 
-  const handleUnpublish = async (bookId) => {
-    const confirm = await Swal.fire({
-      title: "Are you sure?",
-      text: "This book will be unpublished",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, unpublish",
-    });
-
-    if (!confirm.isConfirmed) return;
-
-    try {
-      const token = await user.getIdToken(true);
-
-      const res = await fetch(`http://localhost:3000/api/books/${bookId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: "unpublished" }),
-      });
-
-      if (!res.ok) throw new Error("Unpublish failed");
-
-      const updatedBook = await res.json();
-      setBooks((prev) => prev.map((b) => (b._id === bookId ? updatedBook : b)));
-
-      Swal.fire("Success!", "Book unpublished", "success");
-    } catch (err) {
-      Swal.fire("Error", err.message, "error");
-    }
-  };
-
   if (loading)
     return <p className="text-center mt-10 text-gray-600">Loading...</p>;
   if (!books.length)
@@ -95,56 +56,60 @@ const MyBooks = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">My Books</h2>
-      <table className="table-auto w-full border">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="p-2 border">Image</th>
-            <th className="p-2 border">Title</th>
-            <th className="p-2 border">Author</th>
-            <th className="p-2 border">Price</th>
-            <th className="p-2 border">Status</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {books.map((book) => (
-            <tr key={book._id}>
-              <td className="p-2 border">
-                {book.image ? (
-                  <img
-                    src={book.image}
-                    alt={book.title}
-                    className="w-20 h-20 object-cover"
-                  />
-                ) : (
-                  "No Image"
-                )}
-              </td>
-              <td className="p-2 border">{book.title}</td>
-              <td className="p-2 border">{book.author}</td>
-              <td className="p-2 border">${book.price}</td>
-              <td className="p-2 border capitalize">{book.status}</td>
-              <td className="p-2 border flex gap-2">
-                <button
-                  onClick={() => navigate(`/dashboard/edit-book/${book._id}`)}
-                  className="px-3 py-1 bg-blue-600 text-white rounded"
-                >
-                  Edit
-                </button>
-                {book.status === "published" && (
-                  <button
-                    onClick={() => handleUnpublish(book._id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded"
-                  >
-                    Unpublish
-                  </button>
-                )}
-              </td>
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">My Books</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse shadow-lg rounded-lg overflow-hidden">
+          <thead className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+            <tr>
+              <th className="p-3 text-left">Image</th>
+              <th className="p-3 text-left">Title</th>
+              <th className="p-3 text-left">Author</th>
+              <th className="p-3 text-left">Price</th>
+              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {books.map((book) => (
+              <tr key={book._id} className="hover:bg-gray-50 transition">
+                <td className="p-3">
+                  {book.image ? (
+                    <img
+                      src={book.image}
+                      alt={book.title}
+                      className="w-20 h-20 object-cover rounded-md"
+                    />
+                  ) : (
+                    <span className="text-gray-400">No Image</span>
+                  )}
+                </td>
+                <td className="p-3 font-medium text-gray-700">{book.title}</td>
+                <td className="p-3 text-gray-600">{book.author}</td>
+                <td className="p-3 text-gray-600">${book.price}</td>
+                <td className="p-3 capitalize">
+                  <span
+                    className={`px-2 py-1 rounded-full text-white font-semibold ${
+                      book.status === "published"
+                        ? "bg-green-500"
+                        : "bg-gray-400"
+                    }`}
+                  >
+                    {book.status}
+                  </span>
+                </td>
+                <td className="p-3">
+                  <button
+                    onClick={() => navigate(`/dashboard/edit-book/${book._id}`)}
+                    className=" cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

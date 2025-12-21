@@ -11,9 +11,12 @@ const AllUsers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/users", {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-        });
+        const res = await axios.get(
+          "https://bookscourier.vercel.app/api/users",
+          {
+            headers: { Authorization: `Bearer ${jwtToken}` },
+          }
+        );
 
         // Filter out the logged-in admin using email
         const filteredUsers = res.data.filter(
@@ -33,7 +36,7 @@ const AllUsers = () => {
   const handleRoleChange = async (userId, newRole) => {
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/users/${userId}`,
+        `https://bookscourier.vercel.app/api/users/${userId}`,
         { role: newRole },
         {
           headers: { Authorization: `Bearer ${jwtToken}` },
@@ -110,7 +113,7 @@ const AllUsers = () => {
                     {user.role !== "librarian" && (
                       <button
                         onClick={() => handleRoleChange(user._id, "librarian")}
-                        className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition"
+                        className=" cursor-pointer px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition"
                       >
                         Make Librarian
                       </button>
@@ -118,7 +121,7 @@ const AllUsers = () => {
                     {user.role !== "admin" && (
                       <button
                         onClick={() => handleRoleChange(user._id, "admin")}
-                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md transition"
+                        className=" cursor-pointer px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md transition"
                       >
                         Make Admin
                       </button>

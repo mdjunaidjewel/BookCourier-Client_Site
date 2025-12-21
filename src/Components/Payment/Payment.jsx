@@ -41,7 +41,7 @@ const CheckoutForm = ({ order, user }) => {
     try {
       const token = await user.getIdToken();
       const res = await fetch(
-        "http://localhost:3000/api/create-payment-intent",
+        "https://bookscourier.vercel.app/api/create-payment-intent",
         {
           method: "POST",
           headers: {
@@ -69,7 +69,7 @@ const CheckoutForm = ({ order, user }) => {
       if (result.error) {
         Swal.fire("Payment Failed", result.error.message, "error");
       } else if (result.paymentIntent?.status === "succeeded") {
-        await fetch(`http://localhost:3000/api/orders/${order._id}`, {
+        await fetch(`https://bookscourier.vercel.app/api/orders/${order._id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -184,9 +184,12 @@ const Payment = () => {
     const fetchOrder = async () => {
       try {
         const token = await user.getIdToken();
-        const res = await fetch(`http://localhost:3000/api/orders/${orderId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `https://bookscourier.vercel.app/api/orders/${orderId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!res.ok) throw new Error("Failed to load order");
         const data = await res.json();
         setOrder(data);

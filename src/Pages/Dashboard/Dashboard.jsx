@@ -153,7 +153,7 @@ const Dashboard = () => {
             <button
               key={item.key}
               onClick={() => handleNavigate(item)}
-              className={`flex items-center gap-3 w-full px-4 py-2 mb-2 rounded-lg transition
+              className={` cursor-pointer flex items-center gap-3 w-full px-4 py-2 mb-2 rounded-lg transition
                 ${
                   active === item.key
                     ? "bg-cyan-200 font-semibold"

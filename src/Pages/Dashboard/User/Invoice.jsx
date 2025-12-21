@@ -15,7 +15,7 @@ const Invoice = () => {
       try {
         const token = await user.getIdToken();
         const res = await fetch(
-          `http://localhost:3000/api/orders/user/${user.email}`,
+          `https://bookscourier.vercel.app/api/orders/user/${user.email}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

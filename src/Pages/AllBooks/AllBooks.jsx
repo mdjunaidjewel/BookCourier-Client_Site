@@ -10,7 +10,7 @@ const AllBooks = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/books")
+    fetch("https://bookscourier.vercel.app/api/books")
       .then((res) => res.json())
       .then((data) => {
         setBooks(data);
@@ -55,7 +55,6 @@ const AllBooks = () => {
     );
   }
 
-  // Function to calculate average rating
   const getAverageRating = (reviews) => {
     if (!reviews || !reviews.length) return 0;
     const total = reviews.reduce((sum, r) => sum + r.rating, 0);
@@ -109,34 +108,34 @@ const AllBooks = () => {
             <div
               key={book._id}
               onClick={() => navigate(`/books/${book._id}`)}
-              className="relative bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-2xl"
+              className="relative bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-xl"
             >
               {/* Book Image */}
-              <div className="relative h-64 w-full">
+              <div className="relative w-full overflow-hidden rounded-t-xl h-64 sm:h-72 md:h-64 lg:h-72 bg-gray-100 flex items-center justify-center">
                 <img
                   src={book.image || "/placeholder.png"}
                   alt={book.title}
-                  className="h-full w-full object-cover"
+                  className="max-h-full object-contain"
                 />
-                <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
-                  <p className="text-sm italic">
+                <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/50 to-transparent p-2 text-white">
+                  <p className="text-xs italic">
                     Category: {book.category || "Uncategorized"}
                   </p>
-                  <p className="text-lg font-bold truncate">{book.title}</p>
+                  <p className="text-sm font-semibold truncate">{book.title}</p>
                 </div>
               </div>
 
               {/* Book Info */}
-              <div className="p-4 bg-gray-50">
-                <p className="text-gray-700 mb-1 truncate italic">
-                  Author: {book.author}
+              <div className="p-3 bg-gray-50">
+                <p className="text-gray-700 text-sm mb-1 truncate italic">
+                  By: {book.author}
                 </p>
-                <p className="text-green-600 font-semibold text-lg">
-                  Price: ${book.price}
+                <p className="text-green-600 font-semibold text-base">
+                  ${book.price}
                 </p>
 
-                <p className="mt-1 text-sm text-gray-400">
-                  Added on:{" "}
+                <p className="mt-1 text-xs text-gray-400">
+                  Published:{" "}
                   {new Date(book.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
@@ -145,12 +144,12 @@ const AllBooks = () => {
                 </p>
 
                 {/* Average Rating */}
-                <div className="mt-2 flex items-center gap-1 italic text-yellow-700">
+                <div className="mt-2 flex items-center gap-1 italic text-yellow-700 text-sm">
                   Ratings:
                   {[1, 2, 3, 4, 5].map((i) => (
                     <span
                       key={i}
-                      className={`text-lg ${
+                      className={`text-base ${
                         i <= Math.round(avgRating)
                           ? "text-yellow-400"
                           : "text-gray-300"
@@ -159,7 +158,7 @@ const AllBooks = () => {
                       ★
                     </span>
                   ))}
-                  <span className="ml-2 text-gray-600 text-sm">
+                  <span className="ml-1 text-gray-600 text-xs">
                     ({book.reviews?.length || 0})
                   </span>
                 </div>

@@ -34,7 +34,7 @@ const Register = () => {
       const user = await createUser(email, password, name, photoURL);
 
       // Backend call to ensure user is saved
-      await fetch("http://localhost:3000/api/users", {
+      await fetch("https://bookscourier.vercel.app/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +68,7 @@ const Register = () => {
     try {
       const gUser = await googleLogin();
 
-      await fetch("http://localhost:3000/api/users", {
+      await fetch("https://bookscourier.vercel.app/api/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

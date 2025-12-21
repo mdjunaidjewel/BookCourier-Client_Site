@@ -8,7 +8,7 @@ const LibrarianOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const API_URL = "http://localhost:3000";
+  const API_URL = "https://bookscourier.vercel.app";
 
   // ================= FETCH ORDERS =================
   const fetchOrders = async () => {
@@ -101,7 +101,7 @@ const LibrarianOrders = () => {
                     <select
                       value={order.status}
                       onChange={(e) => updateStatus(order._id, e.target.value)}
-                      className="border rounded px-2 py-1"
+                      className="border rounded px-2 py-1 cursor-pointer"
                     >
                       <option value="pending">Pending</option>
                       <option value="shipped">Shipped</option>
@@ -115,7 +115,7 @@ const LibrarianOrders = () => {
                   {order.status !== "cancelled" && (
                     <button
                       onClick={() => cancelOrder(order._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
+                      className=" cursor-pointer bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
                     >
                       Cancel
                     </button>

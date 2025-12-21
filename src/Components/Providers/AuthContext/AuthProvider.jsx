@@ -22,9 +22,12 @@ const AuthProvider = ({ children }) => {
 
   const fetchRole = async (email, token) => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/users/${email}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `https://bookscourier.vercel.app/api/users/${email}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setRole(res.data?.role || "user");
     } catch (err) {
       console.error("Fetch role error:", err);
@@ -41,7 +44,7 @@ const AuthProvider = ({ children }) => {
     setJwtToken(token);
 
     await axios.post(
-      "http://localhost:3000/api/users",
+      "https://bookscourier.vercel.app/api/users",
       { name, email, role: "user" },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -71,7 +74,7 @@ const AuthProvider = ({ children }) => {
     setJwtToken(token);
 
     await axios.post(
-      "http://localhost:3000/api/users",
+      "https://bookscourier.vercel.app/api/users",
       {
         name: res.user.displayName,
         email: res.user.email,

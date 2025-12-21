@@ -13,11 +13,14 @@ const Wishlist = () => {
       if (!user) return;
       try {
         const token = await user.getIdToken(true);
-        const res = await fetch("http://localhost:3000/api/wishlist", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          "https://bookscourier.vercel.app/api/wishlist",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await res.json();
-        setWishlist(data);
+        setWishlist(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -41,7 +44,7 @@ const Wishlist = () => {
       try {
         const token = await user.getIdToken(true);
         const res = await fetch(
-          `http://localhost:3000/api/wishlist/${wishlistId}`,
+          `https://bookscourier.vercel.app/api/wishlist/${wishlistId}`,
           {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
@@ -86,21 +89,29 @@ const Wishlist = () => {
             {wishlist.map((item) => (
               <tr key={item._id} className="text-center hover:bg-gray-50">
                 <td className="py-2 px-4 border-b">
-                  <img
-                    src={item.bookId.image}
-                    alt={item.bookId.title}
-                    className="h-16 w-16 object-cover mx-auto rounded"
-                  />
+                  {item.bookId?.image ? (
+                    <img
+                      src={item.bookId.image}
+                      alt={item.bookId.title || "Book Image"}
+                      className="h-16 w-16 object-cover mx-auto rounded"
+                    />
+                  ) : (
+                    <span className="text-gray-400">No Image</span>
+                  )}
                 </td>
-                <td className="py-2 px-4 border-b">{item.bookId.title}</td>
-                <td className="py-2 px-4 border-b">{item.bookId.author}</td>
+                <td className="py-2 px-4 border-b">
+                  {item.bookId?.title || "N/A"}
+                </td>
+                <td className="py-2 px-4 border-b">
+                  {item.bookId?.author || "N/A"}
+                </td>
                 <td className="py-2 px-4 border-b text-green-600 font-semibold">
-                  ${item.bookId.price}
+                  ${item.bookId?.price?.toFixed(2) || "0.00"}
                 </td>
                 <td className="py-2 px-4 border-b">
                   <button
                     onClick={() => handleRemove(item._id)}
-                    className=" cursor-pointer bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 transition"
+                    className="cursor-pointer bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 transition"
                   >
                     Remove
                   </button>

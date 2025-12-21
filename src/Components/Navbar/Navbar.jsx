@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import Logo from "../../assets/book-logo.png";
 import { AuthContext } from "../Providers/AuthContext/AuthProvider";
 import Swal from "sweetalert2";
@@ -62,22 +62,22 @@ const Navbar = () => {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow lg:hidden"
           >
             <li>
-              <Link to="/">Home</Link>
+              <NavLink to="/">Home</NavLink>
             </li>
             <li>
-              <Link to="/books">Books</Link>
+              <NavLink to="/books">Books</NavLink>
             </li>
             <li>
-              <Link to="/dashboard">Dashboard</Link>
+              <NavLink to="/dashboard">Dashboard</NavLink>
             </li>
 
             {loading ? (
               <li>Loading...</li>
             ) : !user ? (
               <li>
-                <Link to="/login" className="btn btn-sm btn-primary mt-2">
+                <NavLink to="/login" className="btn btn-sm btn-primary mt-2">
                   Login
-                </Link>
+                </NavLink>
               </li>
             ) : (
               <li className="flex flex-col items-center">
@@ -101,7 +101,7 @@ const Navbar = () => {
         {/* Logo */}
         <img className="w-14" src={Logo} alt="logo" />
         <Link to="/" className="btn btn-ghost text-xl ml-2">
-          BookCourier
+          Books<span className="text-yellow-600">Courier</span>
         </Link>
       </div>
 
@@ -109,26 +109,25 @@ const Navbar = () => {
       <div className="navbar-end hidden lg:flex items-center">
         <ul className="menu menu-horizontal px-1 items-center gap-2">
           <li>
-            <Link to="/">Home</Link>
+            <NavLink to="/">Home</NavLink>
           </li>
           <li>
-            <Link to="/books">Books</Link>
+            <NavLink to="/books">Books</NavLink>
           </li>
           <li>
-            <Link to="/dashboard">Dashboard</Link>
+            <NavLink to="/dashboard">Dashboard</NavLink>
           </li>
 
           {loading ? (
             <li>Loading...</li>
           ) : !user ? (
             <li>
-              <Link to="/login" className="btn btn-primary ml-2">
+              <NavLink to="/login" className="btn btn-primary ml-2">
                 Login
-              </Link>
+              </NavLink>
             </li>
           ) : (
             <li className="dropdown dropdown-end">
-              {/* শুধু প্রোফাইল ছবি দেখাবে */}
               <img
                 src={user.photoURL || "/default-profile.png"}
                 alt="Profile"

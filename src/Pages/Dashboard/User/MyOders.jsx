@@ -28,7 +28,7 @@ const MyOrders = () => {
       try {
         const token = await user.getIdToken(true);
         const res = await fetch(
-          `http://localhost:3000/api/orders/user/${user.email}`,
+          `https://bookscourier.vercel.app/api/orders/user/${user.email}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -62,14 +62,17 @@ const MyOrders = () => {
 
     try {
       const token = await user.getIdToken(true);
-      const res = await fetch(`http://localhost:3000/api/orders/${orderId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: "cancelled" }),
-      });
+      const res = await fetch(
+        `https://bookscourier.vercel.app/api/orders/${orderId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: "cancelled" }),
+        }
+      );
 
       if (!res.ok) throw new Error("Cancel failed");
 
