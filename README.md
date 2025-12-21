@@ -26,10 +26,14 @@ BookCourier is a **library delivery management system** where users can request 
 - **React Router**
 - **React-Leaflet**
 
-### Authentication
-- **Firebase Authentication (Email/Password)**
-- **JWT (Firebase)**
-> Note: Email verification exists but is not yet implemented.
+## 🔐 Authentication & Authorization
+
+- **Firebase Authentication**:
+  - **Email/Password login/signup**  
+  - **Google Sign-In**  
+- **JWT (JSON Web Tokens)** for secure API requests  
+
+> ⚠️ Note: Email verification exists but is not yet implemented.  
 
 ### Backend
 - **Express.js**
