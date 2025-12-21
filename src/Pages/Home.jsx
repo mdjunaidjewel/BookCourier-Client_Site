@@ -17,8 +17,8 @@ const Home = () => {
       duration: 900,
       easing: "ease-in-out",
       offset: 120,
-      once: false, // 🔥 scroll up & down = animation repeat
-      mirror: true, // 🔥 scroll up করলে reverse animation
+      once: false, // scroll up & down = animation repeat
+      mirror: true, // scroll up হলে reverse animation
     });
 
     const timer = setTimeout(() => {
@@ -39,27 +39,27 @@ const Home = () => {
 
   return (
     <div className="min-h-screen overflow-hidden">
-      <section data-aos="fade-up">
+      <section data-aos="fade-up" data-aos-delay="100">
         <Banner />
       </section>
 
-      <section data-aos="zoom-in" className="mt-10">
+      <section data-aos="zoom-in" className="mt-10" data-aos-delay="200">
         <Maps />
       </section>
 
-      <section data-aos="fade-right" className="pt-7">
+      <section data-aos="fade-right" className="pt-7" data-aos-delay="300">
         <WhyChoice />
       </section>
 
-      <section data-aos="fade-left" className="pt-7">
+      <section data-aos="fade-left" className="pt-7" data-aos-delay="400">
         <CustomerReviews />
       </section>
 
-      <section data-aos="flip-up" className="pt-7">
+      <section data-aos="flip-up" className="pt-7" data-aos-delay="500">
         <PlatformStatistics />
       </section>
 
-      <section data-aos="fade-up" className="pt-7">
+      <section data-aos="fade-up" className="pt-7" data-aos-delay="600">
         <FAQSection />
       </section>
     </div>
