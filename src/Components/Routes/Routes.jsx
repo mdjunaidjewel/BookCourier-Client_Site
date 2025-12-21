@@ -26,6 +26,7 @@ import EditBook from "../../Pages/Dashboard/EditBook/EditBook";
 // User Orders
 import OrdersUser from "../../Pages/Dashboard/User/MyOders";
 import Invoice from "../../Pages/Dashboard/User/Invoice";
+import Wishlist from "../../Pages/Dashboard/User/Wishlist";
 
 const router = createBrowserRouter([
   {
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
               { path: "orders", element: <OrdersUser /> },
               { path: "profile", element: <Profile /> },
               { path: "invoice", element: <Invoice /> },
+              { path: "wishlist", element: <Wishlist /> },
 
               // ----- LIBRARIAN -----
               { path: "add-book", element: <AddBook /> },

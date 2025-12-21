@@ -1,8 +1,19 @@
-// src/Pages/User/MyOrders.jsx
 import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../../Components/Providers/AuthContext/AuthProvider";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router";
+
+const statusStyle = {
+  pending: "bg-yellow-100 text-yellow-700",
+  shipped: "bg-blue-100 text-blue-700",
+  delivered: "bg-green-100 text-green-700",
+  cancelled: "bg-red-100 text-red-700",
+};
+
+const paymentStyle = {
+  paid: "bg-green-100 text-green-700",
+  unpaid: "bg-red-100 text-red-700",
+};
 
 const MyOrders = () => {
   const { user } = useContext(AuthContext);
@@ -16,7 +27,6 @@ const MyOrders = () => {
 
       try {
         const token = await user.getIdToken(true);
-
         const res = await fetch(
           `http://localhost:3000/api/orders/user/${user.email}`,
           {
@@ -29,12 +39,7 @@ const MyOrders = () => {
         const data = await res.json();
         setOrders(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error(err);
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "Failed to load your orders!",
-        });
+        Swal.fire("Error", "Failed to load your orders", "error");
       } finally {
         setLoading(false);
       }
@@ -45,18 +50,18 @@ const MyOrders = () => {
 
   const handleCancel = async (orderId) => {
     const confirm = await Swal.fire({
-      title: "Are you sure?",
-      text: "You want to cancel this order?",
+      title: "Cancel Order?",
+      text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, cancel it!",
+      confirmButtonColor: "#dc2626",
+      confirmButtonText: "Yes, cancel",
     });
 
     if (!confirm.isConfirmed) return;
 
     try {
       const token = await user.getIdToken(true);
-
       const res = await fetch(`http://localhost:3000/api/orders/${orderId}`, {
         method: "PATCH",
         headers: {
@@ -66,14 +71,14 @@ const MyOrders = () => {
         body: JSON.stringify({ status: "cancelled" }),
       });
 
-      if (!res.ok) throw new Error("Failed to cancel order");
+      if (!res.ok) throw new Error("Cancel failed");
 
       const updatedOrder = await res.json();
       setOrders((prev) =>
         prev.map((o) => (o._id === orderId ? updatedOrder : o))
       );
 
-      Swal.fire("Cancelled!", "Your order has been cancelled.", "success");
+      Swal.fire("Cancelled!", "Order has been cancelled", "success");
     } catch (err) {
       Swal.fire("Error!", err.message, "error");
     }
@@ -84,57 +89,98 @@ const MyOrders = () => {
   };
 
   if (loading)
-    return <p className="text-center mt-10 text-gray-600">Loading...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-cyan-600"></span>
+      </div>
+    );
 
   if (orders.length === 0)
-    return <p className="text-center mt-10 text-gray-600">No orders found.</p>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-gray-500">
+        <h2 className="text-2xl font-semibold mb-2">No Orders Found</h2>
+        <p>You haven't placed any orders yet.</p>
+      </div>
+    );
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">My Orders</h2>
-      <table className="table-auto w-full border">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="p-2 border">Book Title</th>
-            <th className="p-2 border">Order Date</th>
-            <th className="p-2 border">Status</th>
-            <th className="p-2 border">Payment</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order._id}>
-              <td className="p-2 border">{order.bookId?.title || "N/A"}</td>
-              <td className="p-2 border">
-                {new Date(order.createdAt).toLocaleDateString()}
-              </td>
-              <td className="p-2 border capitalize">{order.status}</td>
-              <td className="p-2 border capitalize">{order.paymentStatus}</td>
-              <td className="p-2 border flex gap-2">
-                {order.status === "pending" && (
-                  <>
-                    <button
-                      onClick={() => handleCancel(order._id)}
-                      className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl p-6 border">
+        <h2 className="text-3xl font-bold text-cyan-700 mb-6">My Orders</h2>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-cyan-100 text-cyan-800">
+                <th className="p-3 text-left">Book</th>
+                <th className="p-3">Order Date</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Payment</th>
+                <th className="p-3">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {orders.map((order) => (
+                <tr
+                  key={order._id}
+                  className="border-b hover:bg-gray-50 transition"
+                >
+                  <td className="p-3 font-medium">
+                    {order.bookId?.title || "N/A"}
+                  </td>
+
+                  <td className="p-3 text-center text-gray-600">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </td>
+
+                  <td className="p-3 text-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                        statusStyle[order.status]
+                      }`}
                     >
-                      Cancel
-                    </button>
-                    {order.paymentStatus === "unpaid" && (
-                      <button
-                        onClick={() => handlePayNow(order._id)}
-                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                      >
-                        Pay Now
-                      </button>
+                      {order.status}
+                    </span>
+                  </td>
+
+                  <td className="p-3 text-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                        paymentStyle[order.paymentStatus]
+                      }`}
+                    >
+                      {order.paymentStatus}
+                    </span>
+                  </td>
+
+                  <td className="p-3 text-center">
+                    {order.status === "pending" && (
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => handleCancel(order._id)}
+                          className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+
+                        {order.paymentStatus === "unpaid" && (
+                          <button
+                            onClick={() => handlePayNow(order._id)}
+                            className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition cursor-pointer"
+                          >
+                            Pay Now
+                          </button>
+                        )}
+                      </div>
                     )}
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

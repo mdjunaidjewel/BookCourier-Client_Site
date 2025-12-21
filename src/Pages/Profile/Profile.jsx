@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 const Profile = () => {
   const context = useContext(AuthContext);
   const user = context?.user || null;
-  const setUser = context?.setUser || (() => {}); // fallback if setUser is not defined
+  const setUser = context?.setUser || (() => {});
 
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,26 +22,30 @@ const Profile = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await updateProfile(auth.currentUser, { displayName: name, photoURL });
-      // Update context if setUser is available
+      await updateProfile(auth.currentUser, {
+        displayName: name,
+        photoURL,
+      });
+
       setUser({ ...user, displayName: name, photoURL });
+
       Swal.fire({
         icon: "success",
         title: "Profile Updated!",
         timer: 1800,
         showConfirmButton: false,
       });
+
       setModalOpen(false);
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Update Failed!",
-        text: error.message || "Something went wrong.",
+        text: error.message || "Something went wrong",
       });
     }
   };
 
-  // Format ISO date to readable string
   const formatDate = (isoString) => {
     if (!isoString) return "N/A";
     const date = new Date(isoString);
@@ -52,12 +56,13 @@ const Profile = () => {
     });
   };
 
-  if (loading)
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <span className="loading loading-spinner loading-xl text-cyan-600"></span>
       </div>
     );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-100 via-white to-blue-100 px-4 py-10">
@@ -66,15 +71,16 @@ const Profile = () => {
           My Profile
         </h2>
 
+        {/* Profile Info */}
         <div className="flex flex-col items-center mb-6">
-          <div className="relative">
-            <img
-              src={user?.photoURL || "/default-profile.png"}
-              alt={user?.displayName || "User"}
-              className="w-28 h-28 rounded-full border-4 border-cyan-400 shadow-lg object-cover"
-            />
-          </div>
-          <h3 className="text-2xl font-semibold mt-3">{user?.displayName}</h3>
+          <img
+            src={user?.photoURL || "/default-profile.png"}
+            alt="Profile"
+            className="w-28 h-28 rounded-full border-4 border-cyan-400 shadow-lg object-cover"
+          />
+          <h3 className="text-2xl font-semibold mt-3">
+            {user?.displayName || "No Name"}
+          </h3>
           <p className="text-gray-600 mt-1">{user?.email}</p>
           {user?.metadata?.creationTime && (
             <p className="text-gray-500 mt-1 text-sm">
@@ -86,48 +92,78 @@ const Profile = () => {
         <div className="flex justify-center">
           <button
             onClick={() => setModalOpen(true)}
-            className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 shadow-md transition-all duration-300"
+            className="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 shadow-md transition cursor-pointer"
           >
             Update Profile
           </button>
         </div>
 
-        {/* Modal */}
+        {/* ================= MODAL ================= */}
         {modalOpen && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md border border-cyan-200">
-              <h3 className="text-xl font-bold mb-4 text-center text-cyan-700">
-                Update Profile
-              </h3>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md border border-cyan-200 animate-scaleUp">
+              {/* Header */}
+              <div className="flex justify-between items-center px-6 py-4 border-b">
+                <h3 className="text-xl font-bold text-cyan-700">
+                  Edit Profile
+                </h3>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="text-gray-400 hover:text-red-500 text-2xl cursor-pointer"
+                >
+                  &times;
+                </button>
+              </div>
 
-              <form onSubmit={handleUpdate} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Enter new name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="input input-bordered w-full border-cyan-300 focus:ring-2 focus:ring-cyan-500 rounded-lg px-3 py-2"
-                  required
+              {/* Preview */}
+              <div className="flex flex-col items-center py-5">
+                <img
+                  src={photoURL || user?.photoURL || "/default-profile.png"}
+                  alt="Preview"
+                  className="w-24 h-24 rounded-full border-4 border-cyan-400 shadow-md object-cover"
                 />
-                <input
-                  type="text"
-                  placeholder="Enter new photo URL"
-                  value={photoURL}
-                  onChange={(e) => setPhotoURL(e.target.value)}
-                  className="input input-bordered w-full border-cyan-300 focus:ring-2 focus:ring-cyan-500 rounded-lg px-3 py-2"
-                  required
-                />
-                <div className="flex justify-between mt-5">
+                <p className="text-gray-500 text-sm mt-2">Live Preview</p>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleUpdate} className="px-6 pb-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="input input-bordered w-full border-cyan-300 focus:ring-2 focus:ring-cyan-500 rounded-xl px-3 py-2"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    Photo URL
+                  </label>
+                  <input
+                    type="text"
+                    value={photoURL}
+                    onChange={(e) => setPhotoURL(e.target.value)}
+                    className="input input-bordered w-full border-cyan-300 focus:ring-2 focus:ring-cyan-500 rounded-xl px-3 py-2"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition-all duration-300"
+                    className="w-full py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl shadow-md transition cursor-pointer"
                   >
-                    Save
+                    Save Changes
                   </button>
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="px-5 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg shadow-md transition-all duration-300"
+                    className="w-full py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl shadow-sm transition cursor-pointer"
                   >
                     Cancel
                   </button>

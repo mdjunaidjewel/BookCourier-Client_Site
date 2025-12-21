@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 
 const BookDetails = () => {
   const { id } = useParams();
-  const { user } = useContext(AuthContext); // Firebase user
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [book, setBook] = useState(null);
@@ -13,63 +13,75 @@ const BookDetails = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({ phone: "", address: "" });
   const [userRole, setUserRole] = useState("");
+  const [wishlistAdded, setWishlistAdded] = useState(false);
+  const [rating, setRating] = useState(0);
 
-  // Fetch book details
+  /* ================= Fetch Book ================= */
   useEffect(() => {
     const fetchBook = async () => {
       try {
         const res = await fetch(`http://localhost:3000/api/books/${id}`);
         if (!res.ok) throw new Error("Book not found");
         const data = await res.json();
-        setBook(data);
+        setTimeout(() => {
+          setBook(data);
+          setLoading(false);
+        }, 500);
       } catch (err) {
         console.error(err);
-        setBook(null);
-      } finally {
-        setLoading(false);
+        setTimeout(() => {
+          setBook(null);
+          setLoading(false);
+        }, 500);
       }
     };
     fetchBook();
   }, [id]);
 
-  // Fetch user role from backend
+  /* ================= Fetch User Role & Wishlist ================= */
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const fetchUserRoleAndWishlist = async () => {
       if (!user) return;
       try {
-        const token = await user.getIdToken(true); // Get Firebase JWT
-        const res = await fetch(
+        const token = await user.getIdToken(true);
+
+        const resUser = await fetch(
           `http://localhost:3000/api/users/${user.email}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        const data = await res.json();
-        setUserRole(data?.role || "user");
+        const userData = await resUser.json();
+        setUserRole(userData?.role || "user");
+
+        const resWishlist = await fetch("http://localhost:3000/api/wishlist", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const wishlistData = await resWishlist.json();
+        const exists = wishlistData.some((item) => item.bookId._id === id);
+        setWishlistAdded(exists);
       } catch (err) {
         console.error(err);
       }
     };
-    fetchUserRole();
-  }, [user]);
+    fetchUserRoleAndWishlist();
+  }, [user, id]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  /* ================= Place Order ================= */
   const handlePlaceOrder = async () => {
     if (!formData.phone || !formData.address) {
       Swal.fire("Error", "Please fill all fields", "error");
       return;
     }
-
     if (!user || userRole !== "user") {
       Swal.fire("Access Denied", "Only normal users can place orders", "error");
       return;
     }
 
     try {
-      const token = await user.getIdToken(true); // Firebase JWT
+      const token = await user.getIdToken(true);
       const orderData = {
         bookId: book._id,
         bookTitle: book.title,
@@ -90,7 +102,6 @@ const BookDetails = () => {
       });
 
       const data = await res.json();
-
       if (res.ok) {
         Swal.fire("Success", "Order placed successfully", "success");
         setModalOpen(false);
@@ -104,76 +115,238 @@ const BookDetails = () => {
     }
   };
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  /* ================= Wishlist ================= */
+  const handleWishlist = async () => {
+    if (!user) {
+      Swal.fire("Error", "Login to add to wishlist", "error");
+      return;
+    }
+    try {
+      const token = await user.getIdToken(true);
+      const res = await fetch("http://localhost:3000/api/wishlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ bookId: book._id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Swal.fire("Success", "Added to wishlist", "success");
+        setWishlistAdded(true);
+      } else {
+        Swal.fire("Error", data.error || "Failed to add wishlist", "error");
+      }
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
+    }
+  };
+
+  /* ================= Submit Review ================= */
+  const handleSubmitReview = async (selectedRating) => {
+    if (!user) {
+      Swal.fire("Error", "Login to submit review", "error");
+      return;
+    }
+
+    try {
+      const token = await user.getIdToken(true);
+      const res = await fetch(`http://localhost:3000/api/books/${id}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ rating: selectedRating }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Swal.fire("Success", "Review submitted", "success");
+        setBook({ ...book, reviews: [...(book.reviews || []), data] });
+        setRating(selectedRating);
+      } else {
+        Swal.fire("Error", data.error || "Failed to submit review", "error");
+      }
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
+    }
+  };
+
+  /* ================= UI ================= */
+  if (loading)
+    return (
+      <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-30 z-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-purple-600"></div>
+      </div>
+    );
+
   if (!book)
-    return <p className="text-center mt-10 text-red-500">Book not found</p>;
+    return (
+      <p className="text-center mt-10 text-red-500 font-semibold">
+        Book not found
+      </p>
+    );
+
+  // Calculate average rating
+  const averageRating = book.reviews?.length
+    ? book.reviews.reduce((sum, r) => sum + r.rating, 0) / book.reviews.length
+    : 0;
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-4">
-      <img
-        src={book.image}
-        alt={book.title}
-        className="w-full rounded shadow-lg"
-      />
-      <h2 className="text-2xl font-bold mt-4">{book.title}</h2>
-      <p className="text-gray-700">{book.author}</p>
-      <p className="mt-4">{book.description}</p>
-      <p className="mt-2 font-bold text-green-600">Price: ${book.price}</p>
-      <p className="mt-2 text-gray-600">
+    <div className="max-w-2xl mx-auto mt-10 p-3 sm:p-4 md:p-6 bg-white rounded-xl shadow-lg">
+      {/* Image */}
+      <div className="flex justify-center">
+        <img
+          src={book.image}
+          alt={book.title}
+          className="w-32 sm:w-40 md:w-48 object-cover rounded-lg shadow-md"
+        />
+      </div>
+
+      {/* Title */}
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-5 text-center">
+        {book.title}
+      </h2>
+
+      {/* Author */}
+      <p className="text-gray-600 text-center mt-1 text-sm sm:text-base">
+        <span className="font-semibold">Author by:</span> {book.author}
+      </p>
+
+      {/* Description */}
+      <div className="mt-5">
+        <h3 className="text-base sm:text-lg font-semibold mb-1">Description</h3>
+        <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
+          {book.description}
+        </p>
+      </div>
+
+      {/* Price */}
+      <p className="mt-4 font-bold text-green-600 text-base sm:text-lg">
+        Price: ${book.price}
+      </p>
+
+      {/* Added By */}
+      <p className="mt-1 text-gray-500 text-xs sm:text-sm">
         Added by: {book.addedByName || "Unknown"}
       </p>
 
-      {userRole === "user" && (
-        <button
-          onClick={() => setModalOpen(true)}
-          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Order Now
-        </button>
-      )}
+      {/* Wishlist & Order */}
+      <div className="flex justify-between items-center mt-5 flex-wrap gap-2">
+        <div className="flex gap-3 flex-wrap">
+          <button
+            onClick={handleWishlist}
+            disabled={wishlistAdded}
+            className={`px-5 py-2 rounded-lg text-white ${
+              wishlistAdded
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-purple-600 hover:bg-purple-700"
+            } transition`}
+          >
+            {wishlistAdded ? "Wishlisted" : "Add to Wishlist"}
+          </button>
 
-      {/* Modal */}
+          {userRole === "user" && (
+            <button
+              onClick={() => setModalOpen(true)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              Order Now
+            </button>
+          )}
+        </div>
+
+        {/* Star Rating */}
+        {userRole === "user" && (
+          <div className="flex items-center gap-2">
+            <span className="font-semibold">Rate:</span>
+            <div className="flex items-center gap-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSubmitReview(i)}
+                  className={`text-lg ${
+                    rating >= i ? "text-yellow-400" : "text-gray-300"
+                  }`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Average Rating Display */}
+      <div className="mt-3 flex items-center gap-1">
+        <span className="font-semibold">Average Rating:</span>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <span
+            key={i}
+            className={`text-lg ${
+              i <= Math.round(averageRating)
+                ? "text-yellow-400"
+                : "text-gray-300"
+            }`}
+          >
+            ★
+          </span>
+        ))}
+        <span className="text-gray-600 ml-2">
+          ({book.reviews?.length || 0} reviews)
+        </span>
+      </div>
+
+      {/* ================= Modal ================= */}
       {modalOpen && (
-        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-30">
-          <div className="bg-white p-6 rounded shadow-lg w-96 relative">
+        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-40">
+          <div className="bg-white p-5 rounded-xl shadow-xl w-80 sm:w-96 relative">
             <button
               onClick={() => setModalOpen(false)}
-              className="absolute top-2 right-2 text-xl font-bold"
+              className="cursor-pointer absolute top-2 right-3 text-2xl font-bold"
             >
               &times;
             </button>
-            <h2 className="text-xl font-bold mb-4">Place Your Order</h2>
+
+            <h2 className="text-lg font-bold mb-4 text-center">
+              Place Your Order
+            </h2>
 
             <input
               type="text"
               value={user.displayName || "User"}
               readOnly
-              className="w-full border px-3 py-2 mb-3 bg-gray-100"
+              className="w-full border px-3 py-2 mb-3 bg-gray-100 rounded"
             />
+
             <input
               type="email"
               value={user.email}
               readOnly
-              className="w-full border px-3 py-2 mb-3 bg-gray-100"
+              className="w-full border px-3 py-2 mb-3 bg-gray-100 rounded"
             />
+
             <input
               type="text"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               placeholder="Phone Number"
-              className="w-full border px-3 py-2 mb-3"
+              className="w-full border px-3 py-2 mb-3 rounded"
             />
+
             <textarea
               name="address"
               value={formData.address}
               onChange={handleChange}
               placeholder="Address"
-              className="w-full border px-3 py-2 mb-3"
+              className="w-full border px-3 py-2 mb-4 rounded"
             />
+
             <button
               onClick={handlePlaceOrder}
-              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+              className="cursor-pointer w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
             >
               Place Order
             </button>

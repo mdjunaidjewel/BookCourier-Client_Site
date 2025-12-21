@@ -36,6 +36,12 @@ const Dashboard = () => {
         path: "/dashboard/invoice",
         icon: <FaFileInvoice />,
       },
+      {
+        key: "wishlist",
+        label: "My Wishlist",
+        path: "/dashboard/wishlist",
+        icon: <FaBook />,
+      },
     ],
 
     librarian: [
@@ -110,7 +116,7 @@ const Dashboard = () => {
   // ---------- REDIRECT IF NO ROLE ----------
   useEffect(() => {
     if (!role) {
-      navigate("/login"); // যদি role undefined হয়
+      navigate("/login");
     }
   }, [role, navigate]);
 
@@ -131,7 +137,6 @@ const Dashboard = () => {
         </nav>
 
         <div className="p-6 flex-1 overflow-auto">
-          {/* Outlet passes JWT & role to child routes */}
           <Outlet context={{ fetchWithJWT, role, jwtToken }} />
         </div>
       </div>

@@ -10,8 +10,7 @@ const AddBook = () => {
     image: "",
     description: "",
     category: "",
-    quantity: 1,
-    price: 0,
+    price: "",
     status: "published",
   });
 
@@ -24,9 +23,9 @@ const AddBook = () => {
     e.preventDefault();
     if (!user) return Swal.fire("Error", "Login first", "error");
 
-    const token = await user.getIdToken();
     try {
-      // Send both email and name to backend
+      const token = await user.getIdToken();
+
       const res = await fetch("http://localhost:3000/api/books", {
         method: "POST",
         headers: {
@@ -35,8 +34,9 @@ const AddBook = () => {
         },
         body: JSON.stringify({
           ...book,
+          price: Number(book.price),
           addedByEmail: user.email,
-          addedByName: user.displayName || "Unknown", // ✨ নাম পাঠাচ্ছি
+          addedByName: user.displayName || "Unknown",
         }),
       });
 
@@ -50,8 +50,7 @@ const AddBook = () => {
           image: "",
           description: "",
           category: "",
-          quantity: 1,
-          price: 0,
+          price: "",
           status: "published",
         });
       } else {
@@ -63,24 +62,29 @@ const AddBook = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded mt-10">
-      <h2 className="text-2xl font-bold mb-6">Add New Book</h2>
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+        Add New Book
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           name="title"
           value={book.title}
           onChange={handleChange}
-          placeholder="Title"
+          placeholder="Book Title"
           className="input input-bordered w-full"
           required
         />
+
         <input
           name="author"
           value={book.author}
           onChange={handleChange}
-          placeholder="Author"
+          placeholder="Author Name"
           className="input input-bordered w-full"
         />
+
         <input
           name="image"
           value={book.image}
@@ -88,40 +92,44 @@ const AddBook = () => {
           placeholder="Image URL"
           className="input input-bordered w-full"
         />
-        <input
+
+        <textarea
           name="description"
           value={book.description}
           onChange={handleChange}
-          placeholder="Description"
-          className="input input-bordered w-full"
+          placeholder="Book Description"
+          className="textarea textarea-bordered w-full"
+          rows="3"
         />
+
         <input
           name="category"
           value={book.category}
           onChange={handleChange}
-          placeholder="Category"
+          placeholder="Category (e.g. Islamic, Novel)"
           className="input input-bordered w-full"
         />
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="number"
-            name="quantity"
-            value={book.quantity}
-            onChange={handleChange}
-            min="1"
-            className="input input-bordered w-full"
-            placeholder="Quantity"
-          />
-          <input
-            type="number"
-            name="price"
-            value={book.price}
-            onChange={handleChange}
-            min="0"
-            className="input input-bordered w-full"
-            placeholder="Price"
-          />
+
+        {/* Price Field */}
+        <div>
+          <label className="block text-sm font-medium mb-1 text-gray-600">
+            Price
+          </label>
+          <div className="flex items-center border rounded-lg px-3 focus-within:ring-2 focus-within:ring-blue-500">
+            <span className="text-gray-500 text-lg mr-2">$</span>
+            <input
+              type="number"
+              name="price"
+              value={book.price}
+              onChange={handleChange}
+              min="0"
+              placeholder="Enter book price"
+              className="w-full py-2 outline-none"
+              required
+            />
+          </div>
         </div>
+
         <select
           name="status"
           value={book.status}
@@ -131,7 +139,8 @@ const AddBook = () => {
           <option value="published">Published</option>
           <option value="unpublished">Unpublished</option>
         </select>
-        <button type="submit" className="btn btn-primary w-full mt-2">
+
+        <button type="submit" className="btn btn-primary w-full mt-4">
           Add Book
         </button>
       </form>
