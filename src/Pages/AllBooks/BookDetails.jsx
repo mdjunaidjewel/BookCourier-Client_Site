@@ -201,7 +201,7 @@ const BookDetails = () => {
     : 0;
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-4 sm:p-6 bg-white rounded-xl shadow-lg">
+    <div className="max-w-4xl mx-auto mt-10 p-4 sm:p-6 bg-[#fafaf8] rounded-xl shadow-lg">
       <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
         {/* Left: Image */}
         <div className="flex-shrink-0 w-full sm:w-48 md:w-56 lg:w-64">
