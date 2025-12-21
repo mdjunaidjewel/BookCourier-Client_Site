@@ -24,7 +24,6 @@ const Wishlist = () => {
         setLoading(false);
       }
     };
-
     fetchWishlist();
   }, [user]);
 
@@ -69,31 +68,47 @@ const Wishlist = () => {
     );
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-4">
+    <div className="max-w-6xl mx-auto mt-10 p-4">
       <h2 className="text-2xl font-bold mb-5 text-center">My Wishlist</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {wishlist.map((item) => (
-          <div key={item._id} className="bg-white p-4 rounded-xl shadow-md">
-            <img
-              src={item.bookId.image}
-              alt={item.bookId.title}
-              className="w-full h-40 object-cover rounded"
-            />
-            <h3 className="mt-2 font-semibold text-lg">{item.bookId.title}</h3>
-            <p className="text-gray-600 text-sm">
-              Author: {item.bookId.author}
-            </p>
-            <p className="text-green-600 font-bold mt-1">
-              ${item.bookId.price}
-            </p>
-            <button
-              onClick={() => handleRemove(item._id)}
-              className=" cursor-pointer mt-3 w-full bg-red-600 text-white py-1 rounded hover:bg-red-700 transition"
-            >
-              Remove
-            </button>
-          </div>
-        ))}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border border-gray-200 rounded-lg">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="py-2 px-4 border-b">Image</th>
+              <th className="py-2 px-4 border-b">Title</th>
+              <th className="py-2 px-4 border-b">Author</th>
+              <th className="py-2 px-4 border-b">Price</th>
+              <th className="py-2 px-4 border-b">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {wishlist.map((item) => (
+              <tr key={item._id} className="text-center hover:bg-gray-50">
+                <td className="py-2 px-4 border-b">
+                  <img
+                    src={item.bookId.image}
+                    alt={item.bookId.title}
+                    className="h-16 w-16 object-cover mx-auto rounded"
+                  />
+                </td>
+                <td className="py-2 px-4 border-b">{item.bookId.title}</td>
+                <td className="py-2 px-4 border-b">{item.bookId.author}</td>
+                <td className="py-2 px-4 border-b text-green-600 font-semibold">
+                  ${item.bookId.price}
+                </td>
+                <td className="py-2 px-4 border-b">
+                  <button
+                    onClick={() => handleRemove(item._id)}
+                    className=" cursor-pointer bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 transition"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

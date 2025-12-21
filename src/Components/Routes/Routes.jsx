@@ -27,6 +27,7 @@ import EditBook from "../../Pages/Dashboard/EditBook/EditBook";
 import OrdersUser from "../../Pages/Dashboard/User/MyOders";
 import Invoice from "../../Pages/Dashboard/User/Invoice";
 import Wishlist from "../../Pages/Dashboard/User/Wishlist";
+import ForgetPassword from "../../Pages/ForgetPassword/ForgetPassword";
 
 const router = createBrowserRouter([
   {
@@ -74,10 +75,15 @@ const router = createBrowserRouter([
         ],
       },
     ],
+    
   },
 
   // ---------- NOT FOUND ----------
   { path: "*", element: <NotFound /> },
+  {
+    path: '/forgot-password',
+    Component:ForgetPassword
+  }
 ]);
 
 export default router;

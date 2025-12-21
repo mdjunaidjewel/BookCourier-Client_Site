@@ -238,7 +238,7 @@ const BookDetails = () => {
           <button
             onClick={handleWishlist}
             disabled={wishlistAdded}
-            className={`px-5 py-2 rounded-lg text-white ${
+            className={` cursor-pointer px-5 py-2 rounded-lg text-white ${
               wishlistAdded
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-purple-600 hover:bg-purple-700"
@@ -250,7 +250,7 @@ const BookDetails = () => {
           {userRole === "user" && (
             <button
               onClick={() => setModalOpen(true)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className=" cursor-pointer px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               Order Now
             </button>
@@ -266,7 +266,7 @@ const BookDetails = () => {
                 <button
                   key={i}
                   onClick={() => handleSubmitReview(i)}
-                  className={`text-lg ${
+                  className={`text-lg cursor-pointer ${
                     rating >= i ? "text-yellow-400" : "text-gray-300"
                   }`}
                 >
